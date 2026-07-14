@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhysicsFlow | Electric Charge &amp; Coulomb's Law</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700;9..40,900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0F2044; --teal:#1D9E75; --amber:#EF9F27;
+  --navy-soft:#1B335F; --bg:#F4F6FA; --card:#FFFFFF;
+  --ink:#1A2233; --muted:#5B6478; --line:#E2E7F0;
+  --teal-soft:#E4F5EE; --amber-soft:#FDF1DC; --red:#D9534F; --red-soft:#FBE9E8;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink); line-height:1.55;}
+.mono{font-family:'Space Mono',monospace;}
+sub{font-size:0.72em;}
+/* ---------- Password gate ---------- */
+#gate{position:fixed; inset:0; background:var(--navy); z-index:1000; display:flex; align-items:center; justify-content:center; padding:24px;}
+#gate .gate-card{background:#fff; border-radius:18px; padding:40px 36px; max-width:420px; width:100%; text-align:center; box-shadow:0 24px 60px rgba(0,0,0,.35);}
+#gate .brand{font-family:'Space Mono',monospace; font-weight:700; color:var(--teal); letter-spacing:.12em; font-size:.8rem; text-transform:uppercase;}
+#gate h1{font-size:1.5rem; margin:10px 0 6px; color:var(--navy);}
+#gate p{color:var(--muted); font-size:.92rem; margin-bottom:22px;}
+#gate input{width:100%; padding:13px 16px; border:2px solid var(--line); border-radius:10px; font-family:'Space Mono',monospace; font-size:1rem; text-align:center; letter-spacing:.1em; outline:none;}
+#gate input:focus{border-color:var(--teal);}
+#gate button{width:100%; margin-top:14px; padding:13px; border:none; border-radius:10px; background:var(--teal); color:#fff; font-family:'DM Sans',sans-serif; font-weight:700; font-size:1rem; cursor:pointer;}
+#gate button:hover{background:#178a65;}
+#gateErr{color:var(--red); font-size:.85rem; margin-top:10px; min-height:1.2em;}
+/* ---------- Header & tabs ---------- */
+header{background:var(--navy); color:#fff; padding:26px 20px 0;}
+.header-inner{max-width:1080px; margin:0 auto;}
+.eyebrow{font-family:'Space Mono',monospace; color:var(--amber); font-size:.75rem; letter-spacing:.16em; text-transform:uppercase; font-weight:700;}
+header h1{font-size:clamp(1.4rem,3.5vw,2rem); font-weight:900; margin:6px 0 2px;}
+header .sub{color:#B9C4DA; font-size:.95rem; margin-bottom:18px;}
+nav{display:flex; gap:4px; flex-wrap:wrap; max-width:1080px; margin:0 auto;}
+nav button{background:transparent; border:none; color:#B9C4DA; font-family:'DM Sans',sans-serif; font-weight:700; font-size:.92rem; padding:12px 18px; cursor:pointer; border-radius:10px 10px 0 0; transition:.15s;}
+nav button:hover{color:#fff; background:var(--navy-soft);}
+nav button.active{background:var(--bg); color:var(--navy);}
+main{max-width:1080px; margin:0 auto; padding:28px 20px 70px;}
+.tab{display:none;}
+.tab.active{display:block; animation:fade .25s ease;}
+@keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+/* ---------- Shared components ---------- */
+.card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:26px; margin-bottom:22px; box-shadow:0 2px 10px rgba(15,32,68,.05);}
+.card h2{color:var(--navy); font-size:1.35rem; margin-bottom:10px;}
+.card h3{color:var(--navy); font-size:1.05rem; margin:16px 0 8px;}
+.card p{margin-bottom:10px; color:var(--ink);}
+.pill{display:inline-block; font-family:'Space Mono',monospace; font-size:.72rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:4px 12px; border-radius:999px; margin-bottom:12px;}
+.pill.teal{background:var(--teal-soft); color:var(--teal);}
+.pill.amber{background:var(--amber-soft); color:#B87710;}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+.grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
+@media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr;}}
+.formula{font-family:'Space Mono',monospace; background:var(--navy); color:#fff; border-radius:12px; padding:16px 20px; text-align:center; font-size:1.15rem; margin:12px 0;}
+.formula .hl{color:var(--amber);}
+.note{background:var(--teal-soft); border-left:4px solid var(--teal); border-radius:0 10px 10px 0; padding:12px 16px; font-size:.92rem; margin:12px 0;}
+.warn{background:var(--amber-soft); border-left:4px solid var(--amber); border-radius:0 10px 10px 0; padding:12px 16px; font-size:.92rem; margin:12px 0;}
+canvas{display:block; width:100%; border-radius:12px; background:#fff; border:1px solid var(--line);}
+.controls{display:flex; flex-wrap:wrap; gap:16px 26px; margin:16px 0;}
+.ctrl{flex:1 1 200px; min-width:180px;}
+.ctrl label{display:flex; justify-content:space-between; font-weight:700; font-size:.88rem; color:var(--navy); margin-bottom:6px;}
+.ctrl label .val{font-family:'Space Mono',monospace; color:var(--teal); font-weight:700;}
+input[type=range]{width:100%; accent-color:var(--teal); cursor:pointer;}
+select,.btn{font-family:'DM Sans',sans-serif; font-weight:700; font-size:.9rem; padding:9px 16px; border-radius:10px; border:2px solid var(--line); background:#fff; cursor:pointer;}
+select:focus{outline:none; border-color:var(--teal);}
+.btn{border:none; transition:.15s;}
+.btn.teal{background:var(--teal); color:#fff;} .btn.teal:hover{background:#178a65;}
+.btn.navy{background:var(--navy); color:#fff;} .btn.navy:hover{background:var(--navy-soft);}
+.btn.amber{background:var(--amber); color:#fff;} .btn.amber:hover{background:#d88c17;}
+.btn.ghost{background:#fff; border:2px solid var(--line); color:var(--navy);} .btn.ghost:hover{border-color:var(--teal);}
+.btn:disabled{opacity:.45; cursor:not-allowed;}
+.seg{display:inline-flex; border:2px solid var(--line); border-radius:10px; overflow:hidden;}
+.seg button{border:none; background:#fff; padding:9px 16px; font-family:'DM Sans',sans-serif; font-weight:700; font-size:.88rem; cursor:pointer; color:var(--muted);}
+.seg button.on{background:var(--navy); color:#fff;}
+.readout{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-top:14px;}
+.stat{background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:12px 14px;}
+.stat .k{font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--muted);}
+.stat .v{font-family:'Space Mono',monospace; font-weight:700; font-size:1.05rem; color:var(--navy); margin-top:2px; word-break:break-word;}
+.stat .v.teal{color:var(--teal);} .stat .v.amber{color:#B87710;} .stat .v.red{color:var(--red);}
+table.cmp{width:100%; border-collapse:collapse; font-size:.9rem; margin-top:10px;}
+table.cmp th{background:var(--navy); color:#fff; padding:8px 10px; text-align:left; font-size:.8rem;}
+table.cmp td{padding:8px 10px; border-bottom:1px solid var(--line); font-family:'Space Mono',monospace; font-size:.84rem;}
+table.cmp tr:nth-child(even) td{background:var(--bg);}
+/* quiz / challenge */
+.opt{display:block; width:100%; text-align:left; background:#fff; border:2px solid var(--line); border-radius:12px; padding:13px 16px; margin-bottom:10px; font-family:'DM Sans',sans-serif; font-size:.95rem; cursor:pointer; transition:.12s;}
+.opt:hover{border-color:var(--teal);}
+.opt.correct{border-color:var(--teal); background:var(--teal-soft);}
+.opt.wrong{border-color:var(--red); background:var(--red-soft);}
+.opt:disabled{cursor:default;}
+.feedback{border-radius:12px; padding:14px 16px; margin-top:12px; font-size:.93rem; display:none;}
+.feedback.good{display:block; background:var(--teal-soft); border:1px solid var(--teal);}
+.feedback.bad{display:block; background:var(--red-soft); border:1px solid var(--red);}
+.progressbar{height:8px; background:var(--line); border-radius:999px; overflow:hidden; margin:10px 0 18px;}
+.progressbar div{height:100%; background:var(--teal); border-radius:999px; transition:width .3s;}
+.chal-answer{display:none; margin-top:14px; background:var(--bg); border:1px dashed var(--teal); border-radius:12px; padding:16px;}
+.chal-answer.open{display:block;}
+.steps-text{background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:14px 16px; min-height:74px; font-size:.94rem; margin-top:12px;}
+.step-count{font-family:'Space Mono',monospace; font-size:.75rem; color:var(--teal); font-weight:700; letter-spacing:.1em; text-transform:uppercase;}
+footer{text-align:center; color:var(--muted); font-size:.8rem; padding:20px; font-family:'Space Mono',monospace;}
+.chal-check{margin-top:14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; font-weight:700; font-size:.9rem; color:var(--navy);}
+.chal-check .btn.sel{box-shadow:0 0 0 3px var(--navy);}
+/* completion screen */
+#quizDone{text-align:center;}
+.score-ring{width:150px; height:150px; border-radius:50%; margin:16px auto; display:flex; align-items:center; justify-content:center; font-family:'Space Mono',monospace; font-weight:700; font-size:1.9rem; color:#fff;}
+#doneCard,#chalScoreCard{background:linear-gradient(150deg,var(--navy) 0%,var(--navy-soft) 100%); color:#fff; border-radius:18px; padding:36px 28px;}
+#doneCard .brand,#chalScoreCard .brand{font-family:'Space Mono',monospace; color:var(--amber); letter-spacing:.14em; font-size:.75rem; font-weight:700;}
+#doneCard input,#chalScoreCard input{margin-top:10px; padding:10px 14px; border-radius:10px; border:none; font-family:'DM Sans',sans-serif; font-size:1rem; text-align:center; width:min(320px,90%);}
+</style>
+</head>
+<body>
+<!-- ================= PASSWORD GATE ================= -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="brand">PhysicsFlow</div>
+    <h1>Electric Charge &amp; Coulomb's Law</h1>
+    <p>Enter the access code from your teacher to begin.</p>
+    <input type="password" id="gateInput" placeholder="ACCESS CODE" autocomplete="off">
+    <button onclick="checkGate()">Unlock</button>
+    <div id="gateErr"></div>
+  </div>
+</div>
+
+<header>
+  <div class="header-inner">
+    <div class="eyebrow">PhysicsFlow · Electrostatics Unit</div>
+    <h1>Electric Charge &amp; Coulomb's Law</h1>
+    <div class="sub">Learn the physics of charge, watch electrons move, and master the inverse-square law.</div>
+  </div>
+  <nav>
+    <button class="active" data-tab="learn" onclick="showTab('learn',this)">1 · Learn</button>
+    <button data-tab="lab" onclick="showTab('lab',this)">2 · Charging Lab</button>
+    <button data-tab="coulomb" onclick="showTab('coulomb',this)">3 · Coulomb Simulator</button>
+    <button data-tab="superpos" onclick="showTab('superpos',this)">4 · Superposition Lab</button>
+    <button data-tab="challenge" onclick="showTab('challenge',this)">5 · Challenge</button>
+    <button data-tab="quiz" onclick="showTab('quiz',this)">6 · Quiz</button>
+  </nav>
+</header>
+
+<main>
+<!-- ================= TAB 1 : LEARN ================= -->
+<section class="tab active" id="tab-learn">
+  <div class="card">
+    <span class="pill teal">Core Idea</span>
+    <h2>What is electric charge?</h2>
+    <p>Electric charge is a fundamental property of matter, just like mass. It comes in two kinds — <strong>positive</strong> and <strong>negative</strong> — and it is the source of all electric forces.</p>
+    <div class="grid3">
+      <div class="stat"><div class="k">Proton</div><div class="v amber">+e &nbsp;(+1.602×10⁻¹⁹ C)</div><p style="font-size:.85rem; margin-top:6px;">Locked inside the nucleus. Protons never move during everyday charging.</p></div>
+      <div class="stat"><div class="k">Electron</div><div class="v teal">−e &nbsp;(−1.602×10⁻¹⁹ C)</div><p style="font-size:.85rem; margin-top:6px;">Light and mobile. <strong>In solid objects, only electrons move</strong> during charging. (In liquids, gases, and plasmas, ions can move too.)</p></div>
+      <div class="stat"><div class="k">Neutron</div><div class="v">0 C</div><p style="font-size:.85rem; margin-top:6px;">No charge at all. Neutrons play no role in electrostatics.</p></div>
+    </div>
+    <div class="note"><strong>Neutral does not mean "no charge inside".</strong> A neutral object has equal numbers of protons and electrons, so the total adds to zero.</div>
+  </div>
+
+  <div class="card">
+    <span class="pill amber">Interactive</span>
+    <h2>Build a charged object</h2>
+    <p>Adjust the number of protons and electrons. Watch the net charge change — and see the object's overall state.</p>
+    <div class="controls">
+      <div class="ctrl"><label>Protons <span class="val" id="pCountLbl">5</span></label><input type="range" id="pCount" min="0" max="10" value="5" oninput="updateAtom()"></div>
+      <div class="ctrl"><label>Electrons <span class="val" id="eCountLbl">5</span></label><input type="range" id="eCount" min="0" max="10" value="5" oninput="updateAtom()"></div>
+    </div>
+    <canvas id="atomCanvas" width="900" height="260" role="img" aria-label="Diagram of an atom: protons fixed in the nucleus and electrons on orbit rings, matching the slider values. The net charge is shown in the readout below."></canvas>
+    <div class="readout">
+      <div class="stat"><div class="k">Net charge count</div><div class="v" id="atomN">n = 0</div></div>
+      <div class="stat"><div class="k">Net charge q = ne</div><div class="v" id="atomQ">0 C</div></div>
+      <div class="stat"><div class="k">State</div><div class="v teal" id="atomState">Neutral</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="pill amber">Interactive</span>
+    <h2>Like charges repel, opposite charges attract</h2>
+    <p>Click each charge to flip its sign and watch the force arrows respond.</p>
+    <div style="display:flex; gap:12px; margin-bottom:10px;">
+      <button class="btn ghost" onclick="flipSign(1)">Flip left charge</button>
+      <button class="btn ghost" onclick="flipSign(2)">Flip right charge</button>
+    </div>
+    <canvas id="pairCanvas" width="900" height="220" role="img" aria-label="Two charges with force arrows: arrows point apart when the signs match (repulsion) and toward each other when the signs differ (attraction). The text below states the current case."></canvas>
+    <div class="note" id="pairNote"></div>
+  </div>
+
+  <div class="card">
+    <span class="pill teal">Two Laws of Charge</span>
+    <h2>Conservation and quantization</h2>
+    <div class="grid2">
+      <div>
+        <h3>1 · Charge is conserved</h3>
+        <p>Charge is never created or destroyed — it only <strong>moves</strong>. When a rod is rubbed with a cloth, electrons transfer from one to the other. Whatever charge the rod gains, the cloth loses exactly.</p>
+        <div class="formula">q<sub>rod</sub> + q<sub>cloth</sub> = <span class="hl">constant</span></div>
+      </div>
+      <div>
+        <h3>2 · Charge is quantized</h3>
+        <p>Charge always comes in whole-number multiples of the elementary charge <em>e</em>. You can transfer 1, 2, or a billion electrons — never half an electron.</p>
+        <div class="formula">q = <span class="hl">n</span>e ,&nbsp; n = ±1, ±2, ±3 …</div>
+        <p style="font-size:.88rem; color:var(--muted);">e = 1.602 × 10⁻¹⁹ C</p>
+      </div>
+    </div>
+    <div class="warn"><strong>Quick check:</strong> could an object carry a charge of 2.5 × 10⁻¹⁹ C? No — that would be about 1.56 electrons, which is not a whole number. Charge like that is impossible.</div>
+  </div>
+
+  <div class="card">
+    <span class="pill teal">Conductors vs Insulators</span>
+    <h2>Where can charge move?</h2>
+    <div class="grid2">
+      <div class="stat"><div class="k">Conductors (metals)</div><p style="font-size:.9rem; margin-top:6px;">Outer electrons are free to roam the whole object. Any excess charge spreads across the <strong>surface</strong>. Examples: copper, aluminium, the human body.</p></div>
+      <div class="stat"><div class="k">Insulators</div><p style="font-size:.9rem; margin-top:6px;">Electrons are bound to their atoms. Charge placed on an insulator <strong>stays where you put it</strong>. Examples: rubber, glass, plastic, dry wood.</p></div>
+    </div>
+  </div>
+</section>
+<!-- ================= TAB 2 : CHARGING LAB ================= -->
+<section class="tab" id="tab-lab">
+  <div class="card">
+    <span class="pill amber">Animated Lab</span>
+    <h2>Five ways to charge (or discharge) an object</h2>
+    <p>Choose a method, then press <strong>Next step</strong> to watch the electrons move. Remember: in these solid objects it is always the <strong>electrons</strong> that move — protons stay locked in their nuclei.</p>
+    <div class="controls" style="align-items:center;">
+      <div class="seg" id="methodSeg">
+        <button class="on" onclick="setMethod('friction',this)">Friction</button>
+        <button onclick="setMethod('conduction',this)">Conduction</button>
+        <button onclick="setMethod('induction',this)">Induction</button>
+        <button onclick="setMethod('grounding',this)">Grounding</button>
+        <button onclick="setMethod('polarization',this)">Polarization</button>
+      </div>
+    </div>
+    <canvas id="labCanvas" width="900" height="330" role="img" aria-label="Animated charging demonstration. Each step is described in full in the step text below the canvas."></canvas>
+    <div class="steps-text">
+      <div class="step-count" id="labStepCount">Step 1 of 4</div>
+      <div id="labStepText"></div>
+    </div>
+    <div style="display:flex; gap:10px; margin-top:12px;">
+      <button class="btn ghost" id="labPrev" onclick="labStep(-1)">◀ Back</button>
+      <button class="btn teal" id="labNext" onclick="labStep(1)">Next step ▶</button>
+      <button class="btn navy" onclick="labReset()">Restart</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Method summary</h2>
+    <table class="cmp">
+      <tr><th>Method</th><th>Contact?</th><th>Final charge of object</th><th>Key idea</th></tr>
+      <tr><td>Friction</td><td>Rubbing</td><td>Opposite to the other object</td><td>Electrons transfer between two insulators</td></tr>
+      <tr><td>Conduction</td><td>Touch</td><td>Same sign as the charged rod</td><td>Electrons flow through the contact point</td></tr>
+      <tr><td>Induction</td><td>No touch</td><td>Opposite sign to the rod</td><td>Ground wire lets electrons escape or enter</td></tr>
+      <tr><td>Grounding</td><td>Wire to Earth</td><td>Neutral</td><td>Earth absorbs or supplies electrons</td></tr>
+      <tr><td>Polarization</td><td>No touch</td><td>Still neutral overall</td><td>Charges inside shift — one side +, one side −</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ================= TAB 3 : COULOMB SIMULATOR ================= -->
+<section class="tab" id="tab-coulomb">
+  <div class="card">
+    <span class="pill teal">The Law</span>
+    <h2>Coulomb's law</h2>
+    <div class="formula">F = k <span class="hl">|q<sub>1</sub> q<sub>2</sub>|</span> / r² &nbsp;&nbsp;·&nbsp;&nbsp; k = 8.99 × 10⁹ N·m²/C²</div>
+    <p>The electric force between two point charges grows with the size of each charge and falls with the <strong>square</strong> of the distance between them. Both charges feel forces that are <strong>equal in magnitude and opposite in direction</strong> — Newton's third law.</p>
+  </div>
+  <div class="card">
+    <span class="pill amber">Simulator</span>
+    <h2>Force explorer</h2>
+    <div class="controls">
+      <div class="ctrl"><label><span>q<sub>1</sub></span> <span class="val" id="q1Lbl"></span></label><input type="range" id="q1" min="-10" max="10" value="4" step="0.5" oninput="updateCoulomb()"></div>
+      <div class="ctrl"><label><span>q<sub>2</sub></span> <span class="val" id="q2Lbl"></span></label><input type="range" id="q2" min="-10" max="10" value="-6" step="0.5" oninput="updateCoulomb()"></div>
+      <div class="ctrl"><label>Separation r <span class="val" id="rLbl"></span></label><input type="range" id="rSep" min="0.2" max="2" value="1" step="0.05" oninput="updateCoulomb()"></div>
+      <div class="ctrl"><label>Charge unit</label>
+        <select id="unitSel" onchange="updateCoulomb()">
+          <option value="1e-6" selected>microcoulombs (μC)</option>
+          <option value="1e-9">nanocoulombs (nC)</option>
+          <option value="1e-3">millicoulombs (mC)</option>
+        </select>
+      </div>
+    </div>
+    <canvas id="coulombCanvas" width="900" height="250" role="img" aria-label="Two point charges with equal and opposite force arrows. Exact values appear in the readout below."></canvas>
+    <div class="readout">
+      <div class="stat"><div class="k">Force magnitude</div><div class="v teal" id="cF">—</div></div>
+      <div class="stat"><div class="k">Interaction</div><div class="v" id="cType">—</div></div>
+      <div class="stat"><div class="k">q<sub>1</sub> in coulombs</div><div class="v" id="cQ1">—</div></div>
+      <div class="stat"><div class="k">q<sub>2</sub> in coulombs</div><div class="v" id="cQ2">—</div></div>
+    </div>
+    <h3>Inverse-square check — what happens to F if…</h3>
+    <table class="cmp">
+      <tr><th>Change</th><th>New force</th><th>Compared with now</th></tr>
+      <tr><td>r doubles (×2)</td><td id="isq1">—</td><td>F ÷ 4</td></tr>
+      <tr><td>r triples (×3)</td><td id="isq2">—</td><td>F ÷ 9</td></tr>
+      <tr><td>r halves (÷2)</td><td id="isq3">—</td><td>F × 4</td></tr>
+      <tr><td>q<sub>1</sub> doubles</td><td id="isq4">—</td><td>F × 2</td></tr>
+      <tr><td>Both charges double</td><td id="isq5">—</td><td>F × 4</td></tr>
+    </table>
+    <div class="note"><strong>Unit conversions:</strong> 1 C = 10³ mC = 10⁶ μC = 10⁹ nC. Always convert to coulombs before substituting into Coulomb's law.</div>
+  </div>
+</section>
+
+<!-- ================= TAB 4 : SUPERPOSITION LAB ================= -->
+<section class="tab" id="tab-superpos">
+  <div class="card">
+    <span class="pill teal">Principle</span>
+    <h2>Superposition of electric forces</h2>
+    <p>When several charges act on one target charge, each source exerts its own Coulomb force <strong>independently</strong>. The net force is the <strong>vector sum</strong> of the individual forces.</p>
+    <div class="formula">F<sub>net</sub> = F<sub>1</sub> + F<sub>2</sub> + F<sub>3</sub> + … &nbsp;(<span class="hl">vector sum</span>)</div>
+  </div>
+  <div class="card">
+    <span class="pill amber">Lab</span>
+    <h2>Net force on a target charge</h2>
+    <div class="controls" style="align-items:center;">
+      <div class="seg">
+        <button class="on" id="dim1btn" onclick="setDim(1)">1-D (line)</button>
+        <button id="dim2btn" onclick="setDim(2)">2-D (plane)</button>
+      </div>
+      <label style="display:flex; align-items:center; gap:8px; font-weight:700; font-size:.9rem; color:var(--navy);">
+        <input type="checkbox" id="useQ3" onchange="updateSuper()" style="width:18px;height:18px;accent-color:var(--teal);"> Add a third source charge
+      </label>
+    </div>
+    <div class="controls">
+      <div class="ctrl"><label><span>Source q<sub>1</sub> (μC)</span> <span class="val" id="sq1Lbl"></span></label><input type="range" id="sq1" min="-8" max="8" value="5" step="1" oninput="updateSuper()"></div>
+      <div class="ctrl"><label><span>Source q<sub>2</sub> (μC)</span> <span class="val" id="sq2Lbl"></span></label><input type="range" id="sq2" min="-8" max="8" value="-5" step="1" oninput="updateSuper()"></div>
+      <div class="ctrl" id="sq3Wrap" style="display:none;"><label><span>Source q<sub>3</sub> (μC)</span> <span class="val" id="sq3Lbl"></span></label><input type="range" id="sq3" min="-8" max="8" value="4" step="1" oninput="updateSuper()"></div>
+      <div class="ctrl"><label><span>Target q<sub>t</sub> (μC)</span> <span class="val" id="sqtLbl"></span></label><input type="range" id="sqt" min="-8" max="8" value="2" step="1" oninput="updateSuper()"></div>
+      <div class="ctrl"><label>Target x-position (m) <span class="val" id="txLbl"></span></label><input type="range" id="tx" min="-1.8" max="1.8" value="0.6" step="0.05" oninput="updateSuper()"></div>
+      <div class="ctrl" id="tyWrap" style="display:none;"><label>Target y-position (m) <span class="val" id="tyLbl"></span></label><input type="range" id="ty" min="-1.2" max="1.2" value="0.8" step="0.05" oninput="updateSuper()"></div>
+    </div>
+    <canvas id="superCanvas" width="900" height="380" role="img" aria-label="Source charges and a target charge with individual force vectors and the net force vector. Magnitudes and direction appear in the readout below."></canvas>
+    <div class="readout" id="superReadout"></div>
+    <div class="note">Each force arrow is drawn in the <strong>same colour as its source charge’s label</strong> — <strong style="color:#1D9E75;">q<sub>1</sub> teal</strong>, <strong style="color:#4A7FD4;">q<sub>2</sub> blue</strong>, <strong style="color:#B0589C;">q<sub>3</sub> plum</strong> — so you can see exactly which charge causes which force. The <strong style="color:#B87710;">amber arrow</strong> is the net force — in 1-D it is drawn on its own line below the axis so it never hides behind the individual arrows. <strong>Equilibrium hunt:</strong> try to find a target position where the net force is zero — the app will tell you when you have found it!</div>
+  </div>
+</section>
+<!-- ================= TAB 5 : CHALLENGE ================= -->
+<section class="tab" id="tab-challenge">
+  <div class="card">
+    <span class="pill amber">Predict First!</span>
+    <h2>Challenge problems</h2>
+    <p>For each challenge, <strong>write down your prediction or answer first</strong> — then reveal the worked solution to check yourself.</p>
+  </div>
+  <div id="challengeList"></div>
+  <div class="card" style="text-align:center;">
+    <div id="chalScoreCard">
+      <div class="brand">PHYSICSFLOW · CHALLENGE RECORD</div>
+      <h2 style="color:#fff; margin-top:10px;">Electric Charge &amp; Coulomb's Law</h2>
+      <input type="text" id="chalName" placeholder="Type your name here">
+      <div class="mono" id="chalScoreLine" style="font-size:1.7rem; margin-top:16px; font-weight:700;">0 / 8 correct</div>
+      <div id="chalAnswered" style="color:#B9C4DA; margin-top:6px;">0 of 8 challenges self-checked</div>
+      <div class="mono" id="chalDate" style="margin-top:14px; font-size:.8rem; color:#B9C4DA;"></div>
+    </div>
+    <p style="margin-top:16px; color:var(--muted); font-size:.9rem;">📸 Screenshot this card and paste it into your worksheet.</p>
+    <button class="btn navy" onclick="resetChallenges()">Reset self-checks</button>
+  </div>
+</section>
+
+<!-- ================= TAB 6 : QUIZ ================= -->
+<section class="tab" id="tab-quiz">
+  <div class="card" id="quizIntro">
+    <span class="pill teal">Assessment</span>
+    <h2>Unit quiz — Electric Charge &amp; Coulomb's Law</h2>
+    <p>12 questions: conceptual + calculation. You get instant feedback after each answer. Useful constants:</p>
+    <div class="formula" style="font-size:.95rem;">k = 8.99 × 10⁹ N·m²/C² &nbsp;·&nbsp; e = 1.602 × 10⁻¹⁹ C</div>
+    <button class="btn teal" onclick="startQuiz()">Start quiz</button>
+  </div>
+  <div class="card" id="quizBody" style="display:none;">
+    <div class="step-count" id="quizProgressLbl"></div>
+    <div class="progressbar"><div id="quizBar" style="width:0%"></div></div>
+    <h2 id="quizQ" style="font-size:1.1rem;"></h2>
+    <div id="quizOpts" style="margin-top:14px;"></div>
+    <div class="feedback" id="quizFb"></div>
+    <button class="btn teal" id="quizNextBtn" style="display:none; margin-top:12px;" onclick="nextQuestion()">Next question ▶</button>
+  </div>
+  <div class="card" id="quizDone" style="display:none;">
+    <div id="doneCard">
+      <div class="brand">PHYSICSFLOW · CERTIFICATE OF COMPLETION</div>
+      <h2 style="color:#fff; margin-top:10px;">Electric Charge &amp; Coulomb's Law</h2>
+      <input type="text" id="studentName" placeholder="Type your name here">
+      <div class="score-ring" id="scoreRing">0%</div>
+      <div class="mono" id="scoreDetail" style="font-size:1rem;"></div>
+      <div id="scoreMsg" style="margin-top:8px; color:#B9C4DA;"></div>
+      <div class="mono" id="doneDate" style="margin-top:14px; font-size:.8rem; color:#B9C4DA;"></div>
+    </div>
+    <p style="margin-top:16px; color:var(--muted); font-size:.9rem;">📸 Screenshot this card and send it to your teacher.</p>
+    <button class="btn navy" onclick="startQuiz()">Restart quiz</button>
+  </div>
+</section>
+</main>
+<footer>© PhysicsFlow — Interactive Physics Learning • Electric Charge &amp; Coulomb's Law</footer>
+<script>
+/* ============ CONSTANTS ============ */
+const K = 8.99e9, E_CHARGE = 1.602e-19;
+const NAVY='#0F2044', TEAL='#1D9E75', AMBER='#EF9F27', LINE='#E2E7F0', MUTED='#5B6478', RED='#D9534F';
+function ssGet(k){ try{ return sessionStorage.getItem(k); }catch(e){ return null; } }
+function ssSet(k,v){ try{ sessionStorage.setItem(k,v); }catch(e){} }
+const SUP={'0':'\u2070','1':'\u00b9','2':'\u00b2','3':'\u00b3','4':'\u2074','5':'\u2075','6':'\u2076','7':'\u2077','8':'\u2078','9':'\u2079','-':'\u207b'};
+function toSup(n){ return String(n).split('').map(c=>SUP[c]||c).join(''); }
+
+/* ============ PASSWORD GATE ============ */
+const GATE_HASH = '9ed761fa391c6ab1d82ce4ce999b73a44597a77de19c26a1f9c1dea971892077';
+async function sha256(str){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function checkGate(){
+  const v = document.getElementById('gateInput').value.trim().toUpperCase();
+  const err = document.getElementById('gateErr');
+  if(!v){ err.textContent='Please enter the access code.'; return; }
+  try{
+    const h = await sha256(v);
+    if(h === GATE_HASH){
+      ssSet('pf_charge2026','1');
+      document.getElementById('gate').style.display='none';
+      initAll();
+    } else { err.textContent='That code is not correct — check with your teacher.'; }
+  }catch(e){ err.textContent='Unlock failed — please open this app over https or localhost.'; }
+}
+document.getElementById('gateInput').addEventListener('keydown', e=>{ if(e.key==='Enter') checkGate(); });
+if(ssGet('pf_charge2026')==='1'){ document.getElementById('gate').style.display='none'; }
+
+/* ============ TABS ============ */
+function showTab(id, btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(id==='learn'){ updateAtom(); }
+  if(id==='coulomb'){ updateCoulomb(); }
+  if(id==='superpos'){ updateSuper(); }
+  if(id==='lab'){ labReset(); }
+}
+
+/* ============ DRAW HELPERS ============ */
+function rr(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function drawPlus(ctx,x,y,r=9){ ctx.fillStyle=AMBER; ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill(); ctx.fillStyle='#fff'; ctx.font='bold '+(r+3)+'px Space Mono'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('+',x,y+1); }
+function drawElectron(ctx,x,y,alpha=1,r=8){ ctx.globalAlpha=alpha; ctx.fillStyle=TEAL; ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill(); ctx.fillStyle='#fff'; ctx.font='bold '+(r+4)+'px Space Mono'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('−',x,y+1); ctx.globalAlpha=1; }
+function arrow(ctx,x1,y1,x2,y2,color,w=4){
+  const a=Math.atan2(y2-y1,x2-x1), h=10+w*1.4;
+  ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=w; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2-h*0.6*Math.cos(a), y2-h*0.6*Math.sin(a)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-h*Math.cos(a-0.42), y2-h*Math.sin(a-0.42));
+  ctx.lineTo(x2-h*Math.cos(a+0.42), y2-h*Math.sin(a+0.42));
+  ctx.closePath(); ctx.fill();
+}
+function label(ctx,txt,x,y,color=NAVY,size=14,bold=true){ ctx.fillStyle=color; ctx.font=(bold?'700 ':'')+size+'px "DM Sans"'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(txt,x,y); }
+function monoLabel(ctx,txt,x,y,color=NAVY,size=13){ ctx.fillStyle=color; ctx.font='700 '+size+'px "Space Mono"'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(txt,x,y); }
+// Draws pre + a true subscript + post, centered on x (canvas has no <sub>, so we shift baseline manually)
+function monoSub(ctx, pre, sub, post, x, y, color=NAVY, size=13){
+  const f1='700 '+size+'px "Space Mono"', f2='700 '+Math.round(size*0.72)+'px "Space Mono"';
+  ctx.fillStyle=color; ctx.textBaseline='middle';
+  ctx.font=f1; const w1=ctx.measureText(pre).width, w3=ctx.measureText(post).width;
+  ctx.font=f2; const w2=ctx.measureText(sub).width;
+  let sx = x-(w1+w2+w3)/2;
+  ctx.textAlign='left';
+  ctx.font=f1; ctx.fillText(pre, sx, y); sx+=w1;
+  ctx.font=f2; ctx.fillText(sub, sx, y+size*0.30); sx+=w2;
+  ctx.font=f1; ctx.fillText(post, sx, y);
+  ctx.textAlign='center';
+}
+function drawGroundSym(ctx,x,y){ ctx.strokeStyle=NAVY; ctx.lineWidth=3; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(x-22,y); ctx.lineTo(x+22,y); ctx.moveTo(x-14,y+8); ctx.lineTo(x+14,y+8); ctx.moveTo(x-6,y+16); ctx.lineTo(x+6,y+16); ctx.stroke(); }
+function fmtForce(F){
+  if(F===0) return '0 N';
+  const abs=Math.abs(F);
+  let v,u;
+  if(abs>=1){v=F; u='N';}
+  else if(abs>=1e-3){v=F*1e3; u='mN';}
+  else if(abs>=1e-6){v=F*1e6; u='μN';}
+  else if(abs>=1e-9){v=F*1e9; u='nN';}
+  else {return F.toExponential(2)+' N';}
+  return v.toPrecision(3)+' '+u;
+}
+function sci(F){ if(F===0) return '0'; const e=Math.floor(Math.log10(Math.abs(F))); const m=F/Math.pow(10,e); return m.toFixed(2)+'×10'+toSup(e); }
+function sciH(F){ if(F===0) return '0'; const e=Math.floor(Math.log10(Math.abs(F))); const m=F/Math.pow(10,e); return m.toFixed(2)+'×10<sup>'+e+'</sup>'; }
+
+/* ============ LEARN : ATOM BUILDER ============ */
+function updateAtom(){
+  const p=+document.getElementById('pCount').value, e=+document.getElementById('eCount').value;
+  document.getElementById('pCountLbl').textContent=p;
+  document.getElementById('eCountLbl').textContent=e;
+  const n=p-e;
+  document.getElementById('atomN').textContent='n = '+(n>0?'+':'')+n;
+  const q=n*E_CHARGE;
+  document.getElementById('atomQ').innerHTML = n===0 ? '0 C' : (n>0?'+':'−')+sciH(Math.abs(q))+' C';
+  const st=document.getElementById('atomState');
+  if(n===0){ st.textContent='Neutral'; st.className='v teal'; }
+  else if(n>0){ st.textContent='Positively charged (lost electrons)'; st.className='v amber'; }
+  else { st.textContent='Negatively charged (gained electrons)'; st.className='v teal'; }
+  const cv=document.getElementById('atomCanvas'), ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  const cx=450, cy=130;
+  // nucleus cluster
+  ctx.strokeStyle=LINE; ctx.lineWidth=2;
+  for(const r of [60,95]){ ctx.beginPath(); ctx.arc(cx,cy,r,0,7); ctx.stroke(); }
+  for(let i=0;i<p;i++){
+    const a=i*2.4, rad=(i===0?0:12+8*Math.sqrt(i));
+    drawPlus(ctx, cx+rad*Math.cos(a), cy+rad*Math.sin(a), 10);
+  }
+  if(p===0){ label(ctx,'(empty nucleus)',cx,cy,MUTED,12,false); }
+  for(let i=0;i<e;i++){
+    const ring=(i<5)?60:95, cnt=(i<5)?Math.min(e,5):e-5, idx=(i<5)?i:i-5;
+    const a=(idx/cnt)*Math.PI*2 - Math.PI/2;
+    drawElectron(ctx, cx+ring*Math.cos(a), cy+ring*Math.sin(a), 1, 9);
+  }
+  label(ctx,'protons: fixed in the nucleus', 160, 40, MUTED, 13, false);
+  label(ctx,'electrons: can be gained or lost', 740, 40, MUTED, 13, false);
+}
+
+/* ============ LEARN : ATTRACT / REPEL ============ */
+let pairSigns=[1,1], pairT=0;
+function flipSign(i){ pairSigns[i-1]*=-1; }
+function drawPair(){
+  const cv=document.getElementById('pairCanvas'); if(!cv) return;
+  // skip all drawing work while the Learn tab is hidden (saves battery on mobile)
+  if(!document.getElementById('tab-learn').classList.contains('active')){ requestAnimationFrame(drawPair); return; }
+  const ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  pairT+=0.04;
+  const pulse=6*Math.sin(pairT);
+  const x1=300,x2=600,y=110,r=34;
+  const same=pairSigns[0]===pairSigns[1];
+  // arrows
+  const len=90+pulse;
+  if(same){ arrow(ctx,x1-r-8,y,x1-r-8-len,y,RED,5); arrow(ctx,x2+r+8,y,x2+r+8+len,y,RED,5); }
+  else { arrow(ctx,x1+r+8,y,x1+r+8+len,y,TEAL,5); arrow(ctx,x2-r-8,y,x2-r-8-len,y,TEAL,5); }
+  for(const [x,s] of [[x1,pairSigns[0]],[x2,pairSigns[1]]]){
+    ctx.fillStyle = s>0 ? AMBER : TEAL;
+    ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='700 34px "Space Mono"'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(s>0?'+':'−',x,y+2);
+  }
+  label(ctx, same?'Same signs → the charges REPEL':'Opposite signs → the charges ATTRACT', 450, 190, NAVY, 15);
+  document.getElementById('pairNote').innerHTML = same
+    ? '<strong>Repulsion.</strong> Both forces point away from the other charge — and they are equal in magnitude (Newton\u2019s third law), even if one charge is bigger.'
+    : '<strong>Attraction.</strong> Each charge is pulled toward the other with equal-magnitude force. Opposite charges always attract.';
+  requestAnimationFrame(drawPair);
+}
+</script>
+<script>
+/* ============ CHARGING LAB ============ */
+let labMethod='friction', labStepIdx=0;
+const lab={props:{}, targets:{}, electrons:[], flags:{}};
+
+function el(x,y){ return {x,y,tx:x,ty:y,a:1,ta:1}; }
+function setE(i,tx,ty,ta=1){ const e=lab.electrons[i]; e.tx=tx; e.ty=ty; e.ta=ta; }
+
+const LAB_METHODS = {
+/* ---------- FRICTION ---------- */
+friction:{
+  init(){
+    lab.props={rodX:230, clothX:670}; lab.targets={...lab.props}; lab.flags={rubbing:false};
+    lab.electrons=[];
+    // 4 electrons in rod, 4 in cloth (offsets from centers)
+    for(let i=0;i<4;i++){ const e=el(230-60+i*40, 168); e.own='rod'; lab.electrons.push(e); }
+    for(let i=0;i<4;i++){ const e=el(670-60+i*40, 172); e.own='cloth'; lab.electrons.push(e); }
+  },
+  steps:[
+    {text:'<strong>Start — both objects are neutral.</strong> The rubber rod and the wool cloth each contain equal numbers of protons (+) and electrons (−). Net charge on each: <span class="mono">0</span>.',
+     set(){ lab.targets.rodX=230; lab.targets.clothX=670; lab.flags.rubbing=false;
+       for(let i=0;i<4;i++){ setE(i, 230-60+i*40, 168); lab.electrons[i].own='rod'; }
+       for(let i=0;i<4;i++){ setE(4+i, 670-60+i*40, 172); lab.electrons[4+i].own='cloth'; } }},
+    {text:'<strong>Rub them together.</strong> Rubbing brings huge numbers of atoms into close contact. Rubber holds electrons more tightly than wool, so electrons are about to jump across.',
+     set(){ lab.targets.rodX=352; lab.targets.clothX=558; lab.flags.rubbing=true;
+       for(let i=0;i<4;i++){ setE(i, 352-60+i*40, 168); lab.electrons[i].own='rod'; }
+       for(let i=0;i<4;i++){ setE(4+i, 558-60+i*40, 172); lab.electrons[4+i].own='cloth'; } }},
+    {text:'<strong>Electrons transfer from the wool to the rod.</strong> Three electrons hop across the contact point. Notice that no protons move — protons are locked in nuclei.',
+     set(){ lab.targets.rodX=352; lab.targets.clothX=558; lab.flags.rubbing=true;
+       setE(4, 352-55, 138); setE(5, 352, 138); setE(6, 352+55, 138);
+       lab.electrons[4].own='rod'; lab.electrons[5].own='rod'; lab.electrons[6].own='rod';
+       setE(7, 558+50, 172); }},
+    {text:'<strong>Separate — charge is conserved.</strong> The rod gained 3 electrons → net <span class="mono" style="color:var(--teal)">−3e</span>. The wool lost 3 electrons → net <span class="mono" style="color:#B87710">+3e</span>. Total charge is still zero: (−3e) + (+3e) = 0.',
+     set(){ lab.targets.rodX=210; lab.targets.clothX=690; lab.flags.rubbing=false;
+       for(let i=0;i<4;i++) setE(i, 210-60+i*40, 168);
+       setE(4, 210-55, 138); setE(5, 210, 138); setE(6, 210+55, 138);
+       setE(7, 690+50, 172); }}
+  ],
+  draw(ctx){
+    const {rodX, clothX}=lab.props;
+    const dyR=lab.dyRod||0, dyC=lab.dyCloth||0;
+    // rod
+    ctx.fillStyle=NAVY; rr(ctx, rodX-110, 125+dyR, 220, 62, 28); ctx.fill();
+    for(let i=0;i<4;i++) drawPlus(ctx, rodX-60+i*40, 145+dyR);
+    label(ctx,'Rubber rod', rodX, 228, NAVY, 14);
+    // cloth
+    ctx.fillStyle='#C9D4E8'; rr(ctx, clothX-105, 118+dyC, 210, 78, 12); ctx.fill();
+    ctx.strokeStyle='#9FB0CE'; ctx.lineWidth=2;
+    for(let i=0;i<4;i++){ ctx.beginPath(); ctx.moveTo(clothX-90, 134+i*15+dyC); ctx.lineTo(clothX+90, 134+i*15+dyC); ctx.stroke(); }
+    for(let i=0;i<4;i++) drawPlus(ctx, clothX-60+i*40, 148+dyC);
+    label(ctx,'Wool cloth', clothX, 228, NAVY, 14);
+    // friction sparks at contact while rubbing
+    if(lab.rubAmp>0.15){
+      const midX=(rodX+110+clothX-105)/2;
+      for(let i=0;i<3;i++){
+        const a=labTime*0.3+i*2.1, rr2=8+6*Math.sin(labTime*0.25+i*1.7);
+        ctx.globalAlpha=0.35+0.3*Math.sin(labTime*0.2+i);
+        ctx.fillStyle=AMBER; ctx.beginPath();
+        ctx.arc(midX+rr2*Math.cos(a), 155+rr2*Math.sin(a)+ (dyR+dyC)/2, 3.2, 0, 7); ctx.fill();
+        ctx.globalAlpha=1;
+      }
+    }
+    if(labStepIdx===3){ monoLabel(ctx,'net −3e', rodX, 258, TEAL, 15); monoLabel(ctx,'net +3e', clothX, 258, '#B87710', 15); }
+    if(labStepIdx===0){ monoLabel(ctx,'neutral', rodX, 258, MUTED, 13); monoLabel(ctx,'neutral', clothX, 258, MUTED, 13); }
+  }
+},
+/* ---------- CONDUCTION ---------- */
+conduction:{
+  init(){
+    lab.props={rodX:200, sphX:660}; lab.targets={...lab.props}; lab.flags={};
+    lab.electrons=[];
+    for(let i=0;i<4;i++) lab.electrons.push(el(200-66+i*44, 138)); // extra electrons on rod
+    for(let i=0;i<3;i++) lab.electrons.push(el(660-40+i*40, 185)); // sphere's own electrons
+  },
+  steps:[
+    {text:'<strong>Start.</strong> The rod carries 4 <em>extra</em> electrons — it is negatively charged. The metal sphere is neutral (its own charges are balanced).',
+     set(){ lab.targets.rodX=200; lab.targets.sphX=660;
+       for(let i=0;i<4;i++) setE(i, 200-66+i*44, 138);
+       for(let i=0;i<3;i++) setE(4+i, 660-40+i*40, 185); }},
+    {text:'<strong>Touch.</strong> The rod is brought into direct contact with the sphere. Now there is a conducting path between them.',
+     set(){ lab.targets.rodX=438; lab.targets.sphX=620;
+       for(let i=0;i<4;i++) setE(i, 438-66+i*44, 138);
+       for(let i=0;i<3;i++) setE(4+i, 620-40+i*40, 185); }},
+    {text:'<strong>Electrons flow onto the sphere.</strong> The extra electrons repel each other, so some flow through the contact point and spread out over the sphere\u2019s surface.',
+     set(){ lab.targets.rodX=438; lab.targets.sphX=620;
+       setE(0, 438-66, 138); setE(1, 438-22, 138);
+       setE(2, 620+52, 150); setE(3, 620-8, 105);
+       for(let i=0;i<3;i++) setE(4+i, 620-40+i*40, 185); }},
+    {text:'<strong>Separate — same sign on both.</strong> Charging by conduction always leaves the object with the <strong>same sign</strong> as the charged rod. Here the rod keeps −2e and the sphere now carries −2e.',
+     set(){ lab.targets.rodX=190; lab.targets.sphX=680;
+       setE(0, 190-66, 138); setE(1, 190-22, 138);
+       setE(2, 680+52, 150); setE(3, 680-8, 105);
+       for(let i=0;i<3;i++) setE(4+i, 680-40+i*40, 185); }}
+  ],
+  draw(ctx){
+    const {rodX, sphX}=lab.props;
+    ctx.fillStyle=NAVY; rr(ctx, rodX-110, 125, 220, 56, 26); ctx.fill();
+    label(ctx,'Charged rod (−)', rodX, 210, NAVY, 14);
+    ctx.fillStyle='#DCE4F2'; ctx.beginPath(); ctx.arc(sphX,155,66,0,7); ctx.fill();
+    ctx.strokeStyle=NAVY; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(sphX,155,66,0,7); ctx.stroke();
+    for(let i=0;i<3;i++) drawPlus(ctx, sphX-40+i*40, 160);
+    label(ctx,'Metal sphere', sphX, 250, NAVY, 14);
+    if(labStepIdx===0) monoLabel(ctx,'neutral', sphX, 272, MUTED, 13);
+    if(labStepIdx===3){ monoLabel(ctx,'net −2e', rodX, 240, TEAL, 15); monoLabel(ctx,'net −2e', sphX, 272, TEAL, 15); }
+  }
+},
+/* ---------- INDUCTION ---------- */
+induction:{
+  init(){
+    lab.props={rodX:110}; lab.targets={...lab.props}; lab.flags={ground:false};
+    lab.electrons=[];
+    const cx=600, cy=150;
+    const spots=[[-30,-25],[30,-25],[-30,25],[30,25]];
+    for(const [dx,dy] of spots) lab.electrons.push(el(cx+dx, cy+dy));
+  },
+  steps:[
+    {text:'<strong>Start.</strong> A neutral metal sphere sits on an insulating stand. A negatively charged rod is far away. The sphere\u2019s electrons are spread evenly.',
+     set(){ lab.targets.rodX=110; lab.flags.ground=false;
+       const s=[[-30,-25],[30,-25],[-30,25],[30,25]];
+       s.forEach((p,i)=>setE(i, 600+p[0], 150+p[1], 1)); }},
+    {text:'<strong>Bring the rod close (no touching!).</strong> The rod\u2019s negative charge <strong>repels</strong> the sphere\u2019s free electrons to the far side. The positive ion cores stay fixed in the metal lattice — the near side reads positive only because the electrons have left it.',
+     set(){ lab.targets.rodX=400; lab.flags.ground=false;
+       setE(0, 648, 120, 1); setE(1, 662, 150, 1); setE(2, 648, 180, 1); setE(3, 660, 132, 1); }},
+    {text:'<strong>Connect a ground wire.</strong> The repelled electrons now have an escape route — two of them flow down the wire into the Earth.',
+     set(){ lab.targets.rodX=400; lab.flags.ground=true;
+       setE(0, 648, 125, 1); setE(1, 660, 155, 1);
+       setE(2, 640, 300, 0); setE(3, 640, 300, 0); }},
+    {text:'<strong>Remove the wire first, then the rod.</strong> Cutting the wire traps the charge deficit. With the rod gone, the remaining electrons spread out — but the sphere is now <strong>positively charged (+2e)</strong>: the <em>opposite</em> sign to the rod.',
+     set(){ lab.targets.rodX=90; lab.flags.ground=false;
+       setE(0, 570, 135, 1); setE(1, 630, 165, 1);
+       setE(2, 640, 300, 0); setE(3, 640, 300, 0); }}
+  ],
+  draw(ctx){
+    const {rodX}=lab.props; const cx=600, cy=150;
+    ctx.fillStyle=NAVY; rr(ctx, rodX-100, 122, 200, 54, 26); ctx.fill();
+    for(let i=0;i<4;i++) drawElectron(ctx, rodX-63+i*42, 149, 1, 7.5);
+    label(ctx,'Charged rod (−)', rodX, 205, NAVY, 13);
+    // stand + sphere
+    ctx.fillStyle='#B9C4DA'; rr(ctx, cx-8, cy+66, 16, 70, 4); ctx.fill();
+    ctx.fillStyle='#DCE4F2'; ctx.beginPath(); ctx.arc(cx,cy,68,0,7); ctx.fill();
+    ctx.strokeStyle=NAVY; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(cx,cy,68,0,7); ctx.stroke();
+    // positive ion cores: FIXED in the metal lattice — they never move
+    for(const [dx,dy] of [[-30,-25],[30,-25],[-30,25],[30,25]]) drawPlus(ctx, cx+dx, cy+dy);
+    if(lab.flags.ground){
+      ctx.strokeStyle=NAVY; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(cx+40, cy+55); ctx.lineTo(cx+40, 285); ctx.stroke();
+      drawGroundSym(ctx, cx+40, 290);
+      label(ctx,'ground wire', cx+118, 260, MUTED, 12, false);
+    }
+    label(ctx,'Metal sphere on insulating stand', cx, 262, NAVY, 13);
+    if(labStepIdx===3) monoLabel(ctx,'net +2e', cx, 285, '#B87710', 15);
+  }
+},
+/* ---------- GROUNDING ---------- */
+grounding:{
+  init(){
+    lab.props={}; lab.targets={}; lab.flags={ground:false};
+    lab.electrons=[];
+    const cx=450, cy=140;
+    const spots=[[-38,-20],[38,-20],[0,-45],[-25,30],[25,30]];
+    for(const [dx,dy] of spots) lab.electrons.push(el(cx+dx, cy+dy));
+  },
+  steps:[
+    {text:'<strong>Start.</strong> This sphere carries 5 extra electrons — net charge <span class="mono" style="color:var(--teal)">−5e</span>. (Only the <em>excess</em> electrons are drawn.)',
+     set(){ lab.flags.ground=false;
+       const s=[[-38,-20],[38,-20],[0,-45],[-25,30],[25,30]];
+       s.forEach((p,i)=>setE(i, 450+p[0], 140+p[1], 1)); }},
+    {text:'<strong>Connect the sphere to the Earth.</strong> The Earth is a gigantic conductor — effectively an infinite reservoir that can absorb or supply electrons.',
+     set(){ lab.flags.ground=true;
+       const s=[[-38,-20],[38,-20],[0,-45],[-25,30],[25,30]];
+       s.forEach((p,i)=>setE(i, 450+p[0], 140+p[1], 1)); }},
+    {text:'<strong>The excess electrons drain away.</strong> The extra electrons repel each other, so they escape down the wire into the Earth.',
+     set(){ lab.flags.ground=true;
+       for(let i=0;i<5;i++) setE(i, 450, 305, 0); }},
+    {text:'<strong>Disconnect — the sphere is neutral.</strong> Grounding discharges an object. (If the object had been <em>positive</em>, electrons would have flowed <em>up</em> from the Earth instead.)',
+     set(){ lab.flags.ground=false;
+       for(let i=0;i<5;i++) setE(i, 450, 305, 0); }}
+  ],
+  draw(ctx){
+    const cx=450, cy=140;
+    ctx.fillStyle='#B9C4DA'; rr(ctx, cx-8, cy+62, 16, 66, 4); ctx.fill();
+    ctx.fillStyle='#DCE4F2'; ctx.beginPath(); ctx.arc(cx,cy,64,0,7); ctx.fill();
+    ctx.strokeStyle=NAVY; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(cx,cy,64,0,7); ctx.stroke();
+    if(lab.flags.ground){
+      ctx.strokeStyle=NAVY; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(cx, cy+62); ctx.lineTo(cx, 288); ctx.stroke();
+      drawGroundSym(ctx, cx, 293);
+    }
+    label(ctx,'Charged sphere', cx, 248, NAVY, 14);
+    monoLabel(ctx, labStepIdx<=1 ? 'net −5e' : (labStepIdx===2 ? 'discharging…' : 'neutral (0)'),
+      cx, 270, labStepIdx<=1?TEAL:(labStepIdx===2?'#B87710':MUTED), 14);
+  }
+},
+/* ---------- POLARIZATION ---------- */
+polarization:{
+  init(){
+    lab.props={rodX:110, blockX:640, d0:0.6, d1:2.4, d2:1.4, d3:3.6, d4:2.9, d5:0.2}; 
+    lab.targets={...lab.props}; lab.flags={arrow:false};
+    lab.electrons=[];
+  },
+  steps:[
+    {text:'<strong>Start.</strong> This block is an <strong>insulator</strong> — its electrons cannot leave their molecules. A nearby charge slightly shifts each molecule\u2019s electron cloud, creating an <strong>induced dipole</strong>. In materials whose molecules are <em>permanent</em> dipoles, the dipoles can also rotate. The animation shows the permanent-dipole case, starting with random directions.',
+     set(){ lab.targets.rodX=110; lab.flags.arrow=false;
+       lab.targets.d0=0.6; lab.targets.d1=2.4; lab.targets.d2=1.4; lab.targets.d3=3.6; lab.targets.d4=2.9; lab.targets.d5=0.2; }},
+    {text:'<strong>Bring a negative rod close.</strong> Each molecule rotates: its <strong>+ end swings toward the rod</strong> and its − end swings away. The block is now polarized — but still neutral overall.',
+     set(){ lab.targets.rodX=330; lab.flags.arrow=false;
+       for(let i=0;i<6;i++) lab.targets['d'+i]=Math.PI; }},
+    {text:'<strong>Result: attraction.</strong> The + ends are slightly <em>closer</em> to the rod than the − ends, and Coulomb\u2019s law says closer means stronger. The attraction wins — a charged object attracts a neutral insulator. This <strong>induced polarization</strong> is why a rubbed balloon sticks to a wall!',
+     set(){ lab.targets.rodX=330; lab.flags.arrow=true;
+       for(let i=0;i<6;i++) lab.targets['d'+i]=Math.PI; }}
+  ],
+  draw(ctx){
+    const {rodX, blockX}=lab.props;
+    ctx.fillStyle=NAVY; rr(ctx, rodX-100, 122, 200, 54, 26); ctx.fill();
+    for(let i=0;i<4;i++) drawElectron(ctx, rodX-63+i*42, 149, 1, 7.5);
+    label(ctx,'Charged rod (−)', rodX, 205, NAVY, 13);
+    // insulator block
+    ctx.fillStyle='#F3E8D4'; rr(ctx, blockX-130, 85, 260, 130, 14); ctx.fill();
+    ctx.strokeStyle='#D9C9A8'; ctx.lineWidth=3; rr(ctx, blockX-130, 85, 260, 130, 14); ctx.stroke();
+    // dipoles: 2 rows x 3 cols
+    let k2=0;
+    for(let r2=0;r2<2;r2++) for(let c=0;c<3;c++){
+      const dx=blockX-80+c*80, dy=120+r2*60, ang=lab.props['d'+k2]; k2++;
+      const L=17;
+      ctx.strokeStyle='#B8A57E'; ctx.lineWidth=5; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(dx-L*Math.cos(ang), dy-L*Math.sin(ang)); ctx.lineTo(dx+L*Math.cos(ang), dy+L*Math.sin(ang)); ctx.stroke();
+      drawPlus(ctx, dx+L*Math.cos(ang), dy+L*Math.sin(ang), 7.5);
+      drawElectron(ctx, dx-L*Math.cos(ang), dy-L*Math.sin(ang), 1, 7.5);
+    }
+    label(ctx,'Neutral insulator', blockX, 240, NAVY, 14);
+    if(lab.flags.arrow){
+      arrow(ctx, blockX-140, 150, blockX-215, 150, AMBER, 6);
+      label(ctx,'net attraction', blockX-180, 185, '#B87710', 13);
+    }
+  }
+}
+};
+
+function setMethod(m, btn){
+  labMethod=m; labStepIdx=0;
+  document.querySelectorAll('#methodSeg button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  LAB_METHODS[m].init();
+  applyLabStep();
+}
+function labReset(){ labStepIdx=0; LAB_METHODS[labMethod].init(); applyLabStep(); }
+function labStep(d){
+  const n=LAB_METHODS[labMethod].steps.length;
+  labStepIdx=Math.max(0, Math.min(n-1, labStepIdx+d));
+  applyLabStep();
+}
+function applyLabStep(){
+  const m=LAB_METHODS[labMethod], n=m.steps.length;
+  m.steps[labStepIdx].set();
+  document.getElementById('labStepCount').textContent='Step '+(labStepIdx+1)+' of '+n;
+  document.getElementById('labStepText').innerHTML=m.steps[labStepIdx].text;
+  document.getElementById('labPrev').disabled = labStepIdx===0;
+  document.getElementById('labNext').disabled = labStepIdx===n-1;
+}
+let labTime=0;
+function labLoop(){
+  // skip all drawing work while the Charging Lab tab is hidden (saves battery on mobile)
+  if(!document.getElementById('tab-lab').classList.contains('active')){ requestAnimationFrame(labLoop); return; }
+  labTime++;
+  // lerp props & electrons
+  for(const k in lab.targets){ lab.props[k] += (lab.targets[k]-lab.props[k])*0.08; }
+  for(const e of lab.electrons){ e.x+=(e.tx-e.x)*0.08; e.y+=(e.ty-e.y)*0.08; e.a+=(e.ta-e.a)*0.08; }
+  // rubbing oscillation (eased in and out) — rod slides against the cloth
+  lab.rubAmp = (lab.rubAmp||0) + (((labMethod==='friction' && lab.flags.rubbing)?1:0) - (lab.rubAmp||0))*0.06;
+  lab.dyRod = Math.sin(labTime*0.16)*16*lab.rubAmp;
+  lab.dyCloth = -lab.dyRod*0.45;
+  const cv=document.getElementById('labCanvas'), ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  LAB_METHODS[labMethod].draw(ctx);
+  for(const e of lab.electrons){
+    if(e.a<=0.02) continue;
+    const dy = (labMethod==='friction') ? (e.own==='rod'?lab.dyRod : e.own==='cloth'?lab.dyCloth : 0) : 0;
+    drawElectron(ctx, e.x, e.y+dy, e.a);
+  }
+  requestAnimationFrame(labLoop);
+}
+</script>
+<script>
+/* ============ COULOMB SIMULATOR ============ */
+function unitName(){ const u=document.getElementById('unitSel').value; return u==='1e-6'?'μC':(u==='1e-9'?'nC':'mC'); }
+function updateCoulomb(){
+  const q1=+document.getElementById('q1').value, q2=+document.getElementById('q2').value;
+  const r=+document.getElementById('rSep').value, unit=+document.getElementById('unitSel').value;
+  const un=unitName();
+  document.getElementById('q1Lbl').textContent=q1+' '+un;
+  document.getElementById('q2Lbl').textContent=q2+' '+un;
+  document.getElementById('rLbl').textContent=r.toFixed(2)+' m';
+  const Q1=q1*unit, Q2=q2*unit;
+  const F = K*Math.abs(Q1*Q2)/(r*r);
+  const repel = Q1*Q2>0, zero = Q1===0||Q2===0;
+  document.getElementById('cF').innerHTML = fmtForce(F)+'  ('+sciH(F)+' N)';
+  const t=document.getElementById('cType');
+  if(zero){ t.textContent='No force (a charge is zero)'; t.className='v'; }
+  else if(repel){ t.textContent='REPULSION (like signs)'; t.className='v red'; }
+  else { t.textContent='ATTRACTION (opposite signs)'; t.className='v teal'; }
+  document.getElementById('cQ1').innerHTML = Q1===0?'0 C':sciH(Q1)+' C';
+  document.getElementById('cQ2').innerHTML = Q2===0?'0 C':sciH(Q2)+' C';
+  document.getElementById('isq1').textContent=fmtForce(F/4);
+  document.getElementById('isq2').textContent=fmtForce(F/9);
+  document.getElementById('isq3').textContent=fmtForce(F*4);
+  document.getElementById('isq4').textContent=fmtForce(F*2);
+  document.getElementById('isq5').textContent=fmtForce(F*4);
+  // canvas
+  const cv=document.getElementById('coulombCanvas'), ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  const cx=450, cy=115, sep=r*190;
+  const x1=cx-sep/2, x2=cx+sep/2;
+  // distance marker
+  ctx.strokeStyle=LINE; ctx.lineWidth=2; ctx.setLineDash([6,6]);
+  ctx.beginPath(); ctx.moveTo(x1,cy+62); ctx.lineTo(x2,cy+62); ctx.stroke(); ctx.setLineDash([]);
+  monoLabel(ctx,'r = '+r.toFixed(2)+' m', cx, cy+82, MUTED, 13);
+  const arrLen = F>0 ? Math.max(22, Math.min(120, 22 + 10*(Math.log10(F)+10))) : 0;
+  for(const [x, q, other] of [[x1,q1,x2],[x2,q2,x1]]){
+    const rad = q===0 ? 12 : 14 + Math.sqrt(Math.abs(q))*5.5;
+    if(!zero){
+      const dir = repel ? Math.sign(x-other) : Math.sign(other-x);
+      arrow(ctx, x+dir*(rad+6), cy, x+dir*(rad+6+arrLen), cy, repel?RED:TEAL, 5);
+    }
+    ctx.fillStyle = q>0?AMBER : q<0?TEAL : '#B9C4DA';
+    ctx.beginPath(); ctx.arc(x,cy,rad,0,7); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='700 '+Math.round(rad)+'px "Space Mono"'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(q>0?'+':q<0?'−':'0', x, cy+1);
+  }
+  monoSub(ctx,'q','1',' = '+q1+' '+un, x1, cy-58, NAVY, 13);
+  monoSub(ctx,'q','2',' = '+q2+' '+un, x2, cy-58, NAVY, 13);
+  cv.setAttribute('aria-label','q1 = '+q1+' '+un+', q2 = '+q2+' '+un+', separation '+r.toFixed(2)+' m. Force '+fmtForce(F)+', '+(zero?'no interaction':(repel?'repulsion':'attraction'))+'.');
+  if(!zero) label(ctx,'The two force arrows are always equal in length — Newton\u2019s third law.', 450, 225, MUTED, 13, false);
+}
+
+/* ============ SUPERPOSITION LAB ============ */
+let superDim=1;
+function setDim(d){
+  superDim=d;
+  document.getElementById('dim1btn').classList.toggle('on', d===1);
+  document.getElementById('dim2btn').classList.toggle('on', d===2);
+  document.getElementById('tyWrap').style.display = d===2?'block':'none';
+  updateSuper();
+}
+function updateSuper(){
+  const useQ3=document.getElementById('useQ3').checked;
+  document.getElementById('sq3Wrap').style.display = useQ3?'block':'none';
+  const sq1=+document.getElementById('sq1').value, sq2=+document.getElementById('sq2').value;
+  const sq3=+document.getElementById('sq3').value, sqt=+document.getElementById('sqt').value;
+  const tx=+document.getElementById('tx').value;
+  const ty= superDim===2 ? +document.getElementById('ty').value : 0;
+  document.getElementById('sq1Lbl').textContent=sq1+' μC';
+  document.getElementById('sq2Lbl').textContent=sq2+' μC';
+  document.getElementById('sq3Lbl').textContent=sq3+' μC';
+  document.getElementById('sqtLbl').textContent=sqt+' μC';
+  document.getElementById('txLbl').textContent=tx.toFixed(2)+' m';
+  document.getElementById('tyLbl').textContent=ty.toFixed(2)+' m';
+  // world setup
+  const FCOL=['#1D9E75','#4A7FD4','#B0589C']; // q1 teal, q2 blue, q3 plum
+  const sources=[{q:sq1, x:-1.2, y:0, sub:'1', col:FCOL[0]}, {q:sq2, x:1.2, y:0, sub:'2', col:FCOL[1]}];
+  if(useQ3) sources.push({q:sq3, x:0, y:(superDim===2? -0.9:0), sub:'3', col:FCOL[2]});
+  // Coulomb's law for point charges is UNDEFINED at r = 0 — forbid target-on-source overlap
+  let overlapSub=null;
+  for(const s of sources){ if(Math.hypot(tx-s.x, ty-s.y)<0.15){ overlapSub=s.sub; break; } }
+  const forces=[];
+  let Fx=0, Fy=0, Fnet=0;
+  if(!overlapSub){
+    for(const s of sources){
+      const dx=tx-s.x, dy=ty-s.y, d=Math.hypot(dx,dy);
+      const Fmag = K*(s.q*1e-6)*(sqt*1e-6)/(d*d); // signed: + = repulsive (away from source)
+      const fx=Fmag*dx/d, fy=Fmag*dy/d;
+      forces.push({fx,fy,mag:Math.abs(Fmag),sub:s.sub,col:s.col});
+      Fx+=fx; Fy+=fy;
+    }
+    Fnet=Math.hypot(Fx,Fy);
+  }
+  // equilibrium: net force negligible compared with the individual forces
+  const maxF = forces.reduce((mx,fo)=>Math.max(mx,fo.mag),0);
+  const balanced = !overlapSub && maxF>1e-12 && Fnet < 0.02*maxF;
+  // readout
+  let html='';
+  if(overlapSub){
+    html='<div class="stat" style="grid-column:1/-1;"><div class="k">Invalid position</div><div class="v red">Charges cannot occupy the same position — move the target away from q<sub>'+overlapSub+'</sub>. At r = 0, Coulomb\u2019s law is undefined.</div></div>';
+  } else {
+    for(const f of forces){
+      html+='<div class="stat"><div class="k">|F from q<sub>'+f.sub+'</sub>|</div><div class="v" style="color:'+f.col+'">'+fmtForce(f.mag)+'</div></div>';
+    }
+    let dirTxt;
+    if(balanced){ dirTxt='equilibrium — the forces cancel'; }
+    else if(superDim===1){ dirTxt = Fnet<1e-12 ? '—' : (Fx>0?'+x direction →':'−x direction ←'); }
+    else { const ang=Math.atan2(Fy,Fx)*180/Math.PI; dirTxt = Fnet<1e-12?'—':ang.toFixed(1)+'° from +x axis'; }
+    html+='<div class="stat"><div class="k">|F net| (vector sum)</div><div class="v '+(balanced?'teal':'amber')+'">'+(balanced?'≈ 0 — balanced! ⚖':fmtForce(Fnet))+'</div></div>';
+    html+='<div class="stat"><div class="k">Net direction</div><div class="v'+(balanced?' teal':'')+'">'+dirTxt+'</div></div>';
+  }
+  document.getElementById('superReadout').innerHTML=html;
+  // canvas
+  const cv=document.getElementById('superCanvas'), ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  const SC=185, CX=450, CY=195;
+  const px=x=>CX+x*SC, py=y=>CY-y*SC;
+  // axes
+  ctx.strokeStyle=LINE; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(40,CY); ctx.lineTo(860,CY); ctx.stroke();
+  if(superDim===2){ ctx.beginPath(); ctx.moveTo(CX,25); ctx.lineTo(CX,365); ctx.stroke(); }
+  // metre ticks
+  ctx.fillStyle=MUTED; ctx.font='11px "Space Mono"'; ctx.textAlign='center';
+  for(let m=-2;m<=2;m++){ ctx.fillText(m+'m', px(m), CY+16); }
+  // sources
+  for(const s of sources){
+    const rad=13+Math.sqrt(Math.abs(s.q))*3.5;
+    ctx.fillStyle = s.q>0?AMBER : s.q<0?TEAL:'#B9C4DA';
+    ctx.beginPath(); ctx.arc(px(s.x),py(s.y),rad,0,7); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='700 15px "Space Mono"'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(s.q>0?'+':s.q<0?'−':'0', px(s.x), py(s.y)+1);
+    monoSub(ctx, 'q', s.sub, ' = '+s.q+' μC', px(s.x), py(s.y)+rad+16, s.col, 12);
+  }
+  // target
+  const txp=px(tx), typ=py(ty);
+  const alen = f => Math.max(20, Math.min(105, 20 + 9.5*(Math.log10(Math.max(f,1e-12))+8)));
+  if(overlapSub){
+    ctx.strokeStyle=RED; ctx.lineWidth=3; ctx.setLineDash([6,5]);
+    ctx.beginPath(); ctx.arc(txp,typ,26,0,7); ctx.stroke(); ctx.setLineDash([]);
+    label(ctx,'⚠ Charges cannot occupy the same position — move the target away.', 450, 30, RED, 14);
+  } else {
+    const EDGE=19; // start arrows just outside the target disk so short arrows stay visible
+    for(const f of forces){
+      if(f.mag<1e-12) continue;
+      const L=alen(f.mag), mm=Math.hypot(f.fx,f.fy), ux=f.fx/mm, uy=f.fy/mm;
+      arrow(ctx, txp+EDGE*ux, typ-EDGE*uy, txp+(EDGE+L)*ux, typ-(EDGE+L)*uy, f.col, 4);
+    }
+    if(balanced){
+      const bx=Math.min(Math.max(txp,230),670);
+      label(ctx,'⚖ Net force ≈ 0 — you found the equilibrium position!', bx, typ+52, TEAL, 15);
+    } else if(Fnet>1e-12){
+      const L=alen(Fnet), ux=Fx/Fnet, uy=Fy/Fnet;
+      if(superDim===1){
+        // collinear with the teal arrows — draw the net vector on its own line below the axis
+        const yOff=48;
+        ctx.strokeStyle=AMBER; ctx.lineWidth=2; ctx.setLineDash([3,4]);
+        ctx.beginPath(); ctx.moveTo(txp, typ+EDGE); ctx.lineTo(txp, typ+yOff); ctx.stroke(); ctx.setLineDash([]);
+        arrow(ctx, txp, typ+yOff, txp+L*ux, typ+yOff, AMBER, 7);
+        monoLabel(ctx,'net', txp+L*ux*0.5, typ+yOff+18, '#B87710', 12);
+      } else {
+        arrow(ctx, txp+EDGE*ux, typ-EDGE*uy, txp+(EDGE+L)*ux, typ-(EDGE+L)*uy, AMBER, 7);
+        monoLabel(ctx,'net', txp+(EDGE+L+18)*ux, typ-(EDGE+L+18)*uy, '#B87710', 12);
+      }
+    }
+  }
+  ctx.fillStyle= sqt>0?AMBER: sqt<0?TEAL:'#B9C4DA';
+  ctx.strokeStyle=NAVY; ctx.lineWidth=3.5;
+  ctx.beginPath(); ctx.arc(txp,typ,15,0,7); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#fff'; ctx.font='700 15px "Space Mono"'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(sqt>0?'+':sqt<0?'−':'0', txp, typ+1);
+  monoSub(ctx,'target q','t','', txp, typ-28, NAVY, 12);
+  cv.setAttribute('aria-label', overlapSub ? 'Invalid: the target charge overlaps source q'+overlapSub+'. Charges cannot occupy the same position.' : 'Net force on the target: '+fmtForce(Fnet)+'. Individual force magnitudes are listed in the readout below.');
+}
+</script>
+<script>
+/* ============ CHALLENGE ============ */
+const CHALLENGES=[
+ {tag:'Predict', title:'Double trouble',
+  q:'Two positive charges repel with force <em>F</em>. Now the distance between them is <strong>doubled</strong> AND one of the charges is <strong>doubled</strong>. Predict the new force before revealing.',
+  a:'Doubling one charge multiplies F by 2. Doubling r divides F by 2² = 4.<br><span class="mono">F&#8242; = F × 2 ÷ 4 = <strong>F/2</strong></span> — the force is halved. Distance changes matter more than charge changes because of the square.'},
+ {tag:'q = ne', title:'Counting electrons',
+  q:'A balloon acquires a charge of <span class="mono">−3.2 nC</span> after being rubbed on hair. How many electrons did it gain?',
+  a:'<span class="mono">n = q / e = 3.2×10⁻⁹ ÷ 1.602×10⁻¹⁹ ≈ <strong>2.0×10¹⁰ electrons</strong></span><br>Twenty billion electrons — yet only about a billionth of a coulomb. The coulomb is a huge unit!'},
+ {tag:'Calculate', title:'Straight Coulomb\u2019s law',
+  q:'Find the force between charges of <span class="mono">+2 μC</span> and <span class="mono">+3 μC</span> separated by <span class="mono">10 cm</span>. Attraction or repulsion?',
+  a:'Convert first: 2 μC = 2×10⁻⁶ C, 3 μC = 3×10⁻⁶ C, 10 cm = 0.10 m.<br><span class="mono">F = (8.99×10⁹)(2×10⁻⁶)(3×10⁻⁶)/(0.10)² = <strong>5.39 N</strong></span><br>Both charges are positive → <strong>repulsion</strong>. Try these numbers in the Coulomb Simulator tab!'},
+ {tag:'Superposition', title:'Piggy in the middle (almost)',
+  q:'q<sub>1</sub> = +4 μC sits at x = 0. q<sub>2</sub> = −2 μC sits at x = 0.60 m. A target charge q<sub>t</sub> = +1 μC is placed at x = 0.30 m. Find the net force on the target.',
+  a:'From q<sub>1</sub> (repulsion, pushes target in +x): <span class="mono">F₁ = (8.99×10⁹)(4×10⁻⁶)(1×10⁻⁶)/(0.30)² = 0.400 N</span><br>From q<sub>2</sub> (attraction, pulls target in +x): <span class="mono">F₂ = (8.99×10⁹)(2×10⁻⁶)(1×10⁻⁶)/(0.30)² = 0.200 N</span><br>Both point the same way, so they <strong>add</strong>: <span class="mono"><strong>F = 0.60 N in the +x direction</strong></span>. Rebuild this exact setup in the Superposition Lab.'},
+ {tag:'Real world', title:'The sticky balloon',
+  q:'A balloon rubbed on hair sticks to a neutral wall. The wall has zero net charge — so why is there any force at all?',
+  a:'The negative balloon <strong>polarizes</strong> the wall: it pushes each wall molecule\u2019s electron cloud slightly away, leaving the near side of every molecule positive — an <strong>induced dipole</strong>. Those positive ends are <em>closer</em> than the negative ends, and by the inverse-square law, closer means stronger. Attraction beats repulsion — the balloon sticks.'},
+ {tag:'Think', title:'Attraction is not proof',
+  q:'A charged rod attracts a tiny piece of paper. A student concludes: "the paper must carry the opposite charge." Is that conclusion valid?',
+  a:'<strong>No.</strong> A charged rod attracts <em>neutral</em> objects too, through polarization. Attraction alone can\u2019t distinguish "oppositely charged" from "neutral". Only <strong>repulsion</strong> is definitive proof that an object is charged (with the same sign as the rod).'},
+ {tag:'Quantization', title:'Possible or impossible?',
+  q:'Which of these charges could a real object carry?<br>(a) <span class="mono">6.4×10⁻¹⁹ C</span> &nbsp; (b) <span class="mono">2.0×10⁻¹⁹ C</span> &nbsp; (c) <span class="mono">−8.0×10⁻¹⁹ C</span>',
+  a:'Divide each by e = 1.602×10⁻¹⁹ C and check for a whole number:<br>(a) n ≈ 4.0 ✔ possible &nbsp;&nbsp;(b) n ≈ 1.25 ✘ impossible &nbsp;&nbsp;(c) n ≈ −5.0 ✔ possible<br>Charge only comes in whole multiples of e.'},
+ {tag:'Compare', title:'Electricity vs gravity',
+  q:'Two protons attract each other gravitationally and repel electrically. Which force is bigger — and roughly by how much?',
+  a:'<span class="mono">F<sub>e</sub>/F<sub>g</sub> = ke²/(Gm<sub>p</sub>²) ≈ 1.2×10³⁶</span><br>The electric repulsion is about <strong>10³⁶ times stronger</strong> than gravity — and this ratio doesn\u2019t depend on distance, since both laws are inverse-square. Gravity only dominates the universe because bulk matter is neutral.'}
+];
+function buildChallenges(){
+  const wrap=document.getElementById('challengeList');
+  wrap.innerHTML = CHALLENGES.map((c,i)=>`
+    <div class="card">
+      <span class="pill amber">${c.tag}</span>
+      <h2 style="font-size:1.1rem;">${i+1} · ${c.title}</h2>
+      <p>${c.q}</p>
+      <button class="btn navy" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent=this.nextElementSibling.classList.contains('open')?'Hide solution':'Reveal solution';">Reveal solution</button>
+      <div class="chal-answer">${c.a}
+        <div class="chal-check"><span>Self-check:</span>
+          <button class="btn teal" onclick="markChal(${i},true,this)">✓ I got it right</button>
+          <button class="btn ghost" onclick="markChal(${i},false,this)">✗ Not yet</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+let chalResults = new Array(CHALLENGES.length).fill(null);
+function markChal(i, val, btn){
+  chalResults[i]=val;
+  btn.parentElement.querySelectorAll('.btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  updateChalScore();
+}
+function updateChalScore(){
+  const correct = chalResults.filter(r=>r===true).length;
+  const answered = chalResults.filter(r=>r!==null).length;
+  document.getElementById('chalScoreLine').textContent = correct+' / '+CHALLENGES.length+' correct';
+  document.getElementById('chalAnswered').textContent = answered+' of '+CHALLENGES.length+' challenges self-checked';
+  document.getElementById('chalDate').textContent = 'Last updated: '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+}
+function resetChallenges(){
+  chalResults = new Array(CHALLENGES.length).fill(null);
+  buildChallenges();
+  document.getElementById('chalScoreLine').textContent='0 / '+CHALLENGES.length+' correct';
+  document.getElementById('chalAnswered').textContent='0 of '+CHALLENGES.length+' challenges self-checked';
+  document.getElementById('chalDate').textContent='';
+}
+
+/* ============ QUIZ ============ */
+const QUIZ=[
+ {q:'During everyday charging processes, which particle actually moves between objects?',
+  o:['Protons','Electrons','Neutrons','Both protons and electrons'], a:1,
+  w:'Protons are locked inside nuclei and neutrons carry no charge. In solid objects, only electrons transfer.'},
+ {q:'Two charges are brought near each other and they push apart. What can you conclude?',
+  o:['One is positive, one is negative','Both are neutral','They carry the same sign of charge','One must be grounded'], a:2,
+  w:'Repulsion happens only between like charges — it is the definitive test that both objects are charged with the same sign.'},
+ {q:'A rubber rod is rubbed with wool and gains electrons. What are the final charges?',
+  o:['Rod −, wool +','Rod +, wool −','Both negative','Rod −, wool neutral'], a:0,
+  w:'The rod gains electrons (negative). By conservation of charge, the wool loses exactly that many electrons, so it becomes equally positive.'},
+ {q:'A metal sphere is charged by induction using a negatively charged rod (with a ground wire). The sphere ends up…',
+  o:['Negative — same as the rod','Positive — opposite to the rod','Neutral','Impossible to say'], a:1,
+  w:'The rod repels electrons out through the ground wire. When the wire is removed, the sphere is left with a deficit of electrons: positive — always the OPPOSITE sign to the rod.'},
+ {q:'An object carries a charge of +4.8×10⁻¹⁹ C. How many electrons has it lost?',
+  o:['1','2','3','4'], a:2,
+  w:'n = q/e = 4.8×10⁻¹⁹ ÷ 1.602×10⁻¹⁹ ≈ 3. It lost 3 electrons.'},
+ {q:'Calculate the force between +1 μC and +2 μC separated by 0.10 m. (k = 8.99×10⁹)',
+  o:['1.8 N','0.18 N','18 N','1.8×10⁻⁶ N'], a:0,
+  w:'F = (8.99×10⁹)(1×10⁻⁶)(2×10⁻⁶)/(0.10)² = 1.8 N. Remember to convert μC → C and square the distance.'},
+ {q:'The distance between two charges is doubled. The force becomes…',
+  o:['Half as big','A quarter as big','Twice as big','Unchanged'], a:1,
+  w:'Inverse-SQUARE law: F ∝ 1/r². Doubling r divides F by 2² = 4.'},
+ {q:'Both charges are doubled AND the separation is doubled. The force becomes…',
+  o:['4× bigger','2× bigger','Unchanged','4× smaller'], a:2,
+  w:'Doubling both charges: ×4. Doubling r: ÷4. The two effects cancel exactly — F is unchanged.'},
+ {q:'Convert 250 nC into coulombs.',
+  o:['2.5×10⁻⁵ C','2.5×10⁻⁷ C','2.5×10⁻⁹ C','2.5×10⁻⁶ C'], a:1,
+  w:'1 nC = 10⁻⁹ C, so 250 nC = 250×10⁻⁹ = 2.5×10⁻⁷ C.'},
+ {q:'A tiny charge of +1 μC sits near a huge charge of +100 μC. Compare the force each one feels.',
+  o:['The big charge feels 100× more force','The small charge feels 100× more force','They feel equal-magnitude forces','Only the small charge feels a force'], a:2,
+  w:'Newton\u2019s third law: the forces form an action–reaction pair — always equal in magnitude and opposite in direction, no matter how different the charges are.'},
+ {q:'A +2 μC target sits exactly halfway between two identical +5 μC charges. The net force on the target is…',
+  o:['Very large, pointing left','Very large, pointing right','Zero','Impossible to find without k'], a:2,
+  w:'Each source pushes the target away with equal magnitude but in opposite directions. The vectors cancel: net force = 0. (Try it in the Superposition Lab!)'},
+ {q:'A charged rod is brought near small neutral pieces of paper (an insulator). The paper…',
+  o:['Is repelled','Is attracted (polarization)','Feels no force at all','Becomes permanently charged'], a:1,
+  w:'The rod induces a dipole in each paper molecule; the nearer (opposite) ends are attracted more strongly than the farther ends are repelled. Net result: attraction.'}
+];
+let qIdx=0, qScore=0;
+function startQuiz(){
+  qIdx=0; qScore=0;
+  document.getElementById('quizIntro').style.display='none';
+  document.getElementById('quizDone').style.display='none';
+  document.getElementById('quizBody').style.display='block';
+  renderQuestion();
+}
+function renderQuestion(){
+  const q=QUIZ[qIdx];
+  document.getElementById('quizProgressLbl').textContent='Question '+(qIdx+1)+' of '+QUIZ.length+' · Score '+qScore;
+  document.getElementById('quizBar').style.width=(qIdx/QUIZ.length*100)+'%';
+  document.getElementById('quizQ').innerHTML=q.q;
+  const fb=document.getElementById('quizFb'); fb.className='feedback'; fb.innerHTML='';
+  document.getElementById('quizNextBtn').style.display='none';
+  document.getElementById('quizOpts').innerHTML = q.o.map((o,i)=>
+    `<button class="opt" onclick="answer(${i},this)">${String.fromCharCode(65+i)}. ${o}</button>`).join('');
+}
+function answer(i, btn){
+  const q=QUIZ[qIdx];
+  document.querySelectorAll('#quizOpts .opt').forEach((b,j)=>{
+    b.disabled=true;
+    if(j===q.a) b.classList.add('correct');
+  });
+  const fb=document.getElementById('quizFb');
+  if(i===q.a){ qScore++; fb.className='feedback good'; fb.innerHTML='<strong>✓ Correct!</strong> '+q.w; }
+  else { btn.classList.add('wrong'); fb.className='feedback bad'; fb.innerHTML='<strong>✗ Not quite.</strong> The answer is '+String.fromCharCode(65+q.a)+'. '+q.w; }
+  document.getElementById('quizNextBtn').style.display='inline-block';
+  document.getElementById('quizNextBtn').textContent = qIdx===QUIZ.length-1 ? 'See my results ▶' : 'Next question ▶';
+}
+function nextQuestion(){
+  qIdx++;
+  if(qIdx<QUIZ.length){ renderQuestion(); return; }
+  document.getElementById('quizBody').style.display='none';
+  document.getElementById('quizDone').style.display='block';
+  const pct=Math.round(qScore/QUIZ.length*100);
+  const ring=document.getElementById('scoreRing');
+  ring.textContent=pct+'%';
+  ring.style.background = pct>=80 ? TEAL : pct>=60 ? AMBER : RED;
+  document.getElementById('scoreDetail').textContent=qScore+' / '+QUIZ.length+' correct';
+  document.getElementById('scoreMsg').textContent =
+    pct===100 ? 'Perfect score — you have fully charged your understanding! ⚡' :
+    pct>=80 ? 'Excellent work — Coulomb would be proud!' :
+    pct>=60 ? 'Good effort — review the Learn and Lab tabs, then try again.' :
+    'Keep going — work through the Charging Lab and Challenge tabs, then retake the quiz.';
+  document.getElementById('doneDate').textContent='Completed: '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+}
+
+/* ============ INIT ============ */
+let started=false;
+function initAll(){
+  if(started) return; started=true;
+  updateAtom(); drawPair();
+  LAB_METHODS[labMethod].init(); applyLabStep(); labLoop();
+  updateCoulomb(); setDim(1); buildChallenges();
+}
+initAll._=0;
+if(ssGet('pf_charge2026')==='1'){ initAll(); }
+</script>
+</body>
+</html>
