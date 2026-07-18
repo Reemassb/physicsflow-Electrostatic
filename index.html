@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PhysicsFlow | Electric Fields & Electric Potential</title>
+<style>
+  :root{
+    --navy:#12355b;
+    --blue:#2076d2;
+    --sky:#eaf6ff;
+    --teal:#16a6a6;
+    --mint:#e8fbf8;
+    --orange:#ff9f1c;
+    --yellow:#fff3c4;
+    --purple:#7567d9;
+    --pink:#ffeef5;
+    --red:#e85d5a;
+    --green:#35a853;
+    --ink:#263238;
+    --muted:#62748a;
+    --paper:#ffffff;
+    --line:#c8d7e6;
+    --shadow:0 12px 30px rgba(18,53,91,.14);
+    --radius:22px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:linear-gradient(135deg,#f7fbff 0%,#eefaff 48%,#fff7e6 100%);color:var(--ink);font-family:Inter,Arial,Helvetica,sans-serif;}
+  body{min-height:100vh;}
+  .app{max-width:1220px;margin:0 auto;padding:18px 16px 46px;}
+  header{
+    background:radial-gradient(circle at top left,rgba(255,255,255,.55),transparent 32%),linear-gradient(135deg,var(--navy),#174c84 48%,var(--teal));
+    color:white;border-radius:28px;padding:22px 22px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden;
+  }
+  header:before{content:"";position:absolute;inset:-45px -20px auto auto;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.10)}
+  header:after{content:"E  V";position:absolute;right:25px;bottom:2px;font-weight:900;font-size:74px;letter-spacing:8px;opacity:.08;}
+  .brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:.3px;font-size:1.1rem;position:relative;z-index:1}
+  .brand-mark{width:46px;height:46px;border-radius:16px;background:white;color:var(--navy);display:grid;place-items:center;font-weight:900;box-shadow:0 6px 20px rgba(0,0,0,.16)}
+  h1{font-size:clamp(2.0rem,4vw,4.2rem);margin:14px 0 5px;line-height:1;font-weight:950;letter-spacing:-1.4px;position:relative;z-index:1}
+  .subtitle{font-size:clamp(1rem,2vw,1.35rem);max-width:850px;opacity:.96;line-height:1.42;position:relative;z-index:1}
+  .pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;position:relative;z-index:1}
+  .pill{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.24);border-radius:999px;padding:8px 12px;font-weight:700;font-size:.92rem;backdrop-filter:blur(6px)}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 14px;position:sticky;top:0;background:rgba(247,251,255,.94);z-index:10;padding:12px 0 10px;backdrop-filter:blur(8px);}
+  .tab{border:2px solid var(--line);background:white;color:var(--navy);font-weight:850;border-radius:999px;padding:10px 13px;cursor:pointer;box-shadow:0 5px 12px rgba(18,53,91,.06);transition:.18s ease;font-size:.93rem;}
+  .tab:hover{transform:translateY(-1px);border-color:var(--blue)}
+  .tab.active{background:var(--navy);color:white;border-color:var(--navy)}
+  .panel{display:none;animation:fade .25s ease;}
+  .panel.active{display:block}
+  @keyframes fade{from{opacity:.25;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;}
+  .card{background:rgba(255,255,255,.94);border:2px solid #dce9f5;border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+  .card h2,.card h3{margin:0 0 10px;color:var(--navy);line-height:1.1}
+  .card h2{font-size:1.45rem}.card h3{font-size:1.12rem}
+  .card p{line-height:1.55;margin:8px 0;color:#31475d}
+  .span-12{grid-column:span 12}.span-8{grid-column:span 8}.span-7{grid-column:span 7}.span-6{grid-column:span 6}.span-5{grid-column:span 5}.span-4{grid-column:span 4}.span-3{grid-column:span 3}
+  .note{background:var(--yellow);border:2px dashed #f3c64f;border-radius:18px;padding:12px 14px;font-weight:700;color:#5b4310}
+  .equation{font-family:Georgia,'Times New Roman',serif;background:#f5f8ff;border:2px solid #cdddf5;border-radius:18px;padding:14px;text-align:center;font-size:1.25rem;color:var(--navy);font-weight:700;margin:10px 0}
+  .small{font-size:.92rem;color:var(--muted)}
+  .tag{display:inline-block;border-radius:999px;padding:5px 10px;font-size:.8rem;font-weight:850;margin:3px;background:#edf6ff;color:var(--blue);border:1px solid #cfe6ff}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .control{margin:13px 0 8px;}
+  .control label{display:flex;justify-content:space-between;gap:12px;font-size:.94rem;font-weight:850;color:var(--navy);margin-bottom:5px;}
+  input[type="range"]{width:100%;accent-color:var(--blue)}
+  select,button,input[type="number"]{font:inherit;border-radius:14px;border:2px solid #d6e4f1;background:white;padding:9px 10px;color:var(--ink)}
+  button{cursor:pointer;font-weight:850;color:white;background:var(--blue);border-color:var(--blue);box-shadow:0 7px 16px rgba(32,118,210,.20);transition:.18s ease;}
+  button:hover{transform:translateY(-1px);filter:brightness(1.03)}
+  button.secondary{background:white;color:var(--navy);border-color:#c9d9e9;box-shadow:none}
+  button.orange{background:var(--orange);border-color:var(--orange);color:#342100}
+  button.teal{background:var(--teal);border-color:var(--teal)}
+  .button-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+  .result{background:var(--mint);border:2px solid #bcece5;border-radius:18px;padding:12px;margin-top:12px;color:#124d4d;font-weight:750;line-height:1.45;}
+  .warning{background:#fff2f2;border-color:#ffc9c7;color:#813431;}
+  .canvas-wrap{background:linear-gradient(180deg,#f9fdff,#eef8ff);border:2px solid #d5e6f4;border-radius:22px;padding:10px;position:relative;min-height:360px;}
+  canvas{display:block;width:100%;height:auto;border-radius:16px;background:white;border:1px solid #dce8f2;}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;font-size:.85rem;color:var(--muted);}
+  .key{display:flex;align-items:center;gap:6px;background:white;border:1px solid #d8e7f4;border-radius:999px;padding:5px 8px;}
+  .swatch{width:12px;height:12px;border-radius:50%;display:inline-block}.pos{background:#e85d5a}.neg{background:#2076d2}.field{background:#16a6a6}.equip{background:#7567d9}.platep{background:#ff9f1c}.platen{background:#2076d2}
+  .formula-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:12px;}
+  .formula{border:2px solid #d9e8f4;border-radius:18px;padding:12px;background:white;min-height:120px;}
+  .formula strong{display:block;color:var(--navy);font-size:1.05rem;margin-bottom:6px}.formula .eq{font-family:Georgia,'Times New Roman',serif;font-size:1.25rem;color:var(--purple);font-weight:800;}
+  .steps{counter-reset:step;display:grid;gap:10px;}
+  .step{border:2px solid #deebf6;border-radius:18px;background:#fbfdff;padding:12px 12px 12px 44px;position:relative;}
+  .step:before{counter-increment:step;content:counter(step);position:absolute;left:12px;top:12px;width:22px;height:22px;border-radius:50%;background:var(--orange);display:grid;place-items:center;font-weight:900;color:#2c1a00;font-size:.85rem}
+  .challenge{border:2px solid #d9e7f4;border-radius:20px;padding:14px;margin:12px 0;background:white;}
+  .challenge h3{display:flex;justify-content:space-between;gap:12px;align-items:center;}
+  .choice{display:block;width:100%;text-align:left;margin:8px 0;background:white;color:var(--ink);border-color:#d6e5f2;box-shadow:none;font-weight:750}
+  .choice.selected{border-color:var(--blue);background:#eef7ff}.choice.correct{border-color:var(--green);background:#effaf2}.choice.incorrect{border-color:var(--red);background:#fff0ef}
+  .score-card{background:linear-gradient(135deg,#ffffff,#effaff);border:2px solid #cce8f5;border-radius:22px;padding:16px;margin-top:12px;font-weight:800;color:var(--navy)}
+  .progress{height:12px;background:#e5eff7;border-radius:999px;overflow:hidden;margin-top:10px}.bar{height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--blue));transition:.25s ease}
+  .callout{border-left:6px solid var(--teal);background:#f3fffd;border-radius:16px;padding:12px 14px;margin-top:12px;color:#174b4b}
+  .mini-card{display:flex;gap:10px;align-items:flex-start;padding:12px;border:2px solid #dbe9f5;border-radius:18px;background:#fff}.mini-card .icon{width:38px;height:38px;border-radius:14px;display:grid;place-items:center;background:#eef7ff;color:var(--blue);font-weight:900;flex:none}.mini-card strong{color:var(--navy)}
+  .print-hide{}
+  @media(max-width:920px){.span-8,.span-7,.span-6,.span-5,.span-4,.span-3{grid-column:span 12}.two-col,.formula-grid{grid-template-columns:1fr}.tabs{position:static}.canvas-wrap{min-height:280px}header:after{display:none}}
+  body.locked .app{display:none}
+  .gate{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#f7fbff 0%,#eefaff 48%,#fff7e6 100%);}
+  body.locked .gate{display:flex}
+  .gate-card{background:rgba(255,255,255,.96);border:2px solid #dce9f5;border-radius:28px;box-shadow:var(--shadow);padding:30px 28px;max-width:430px;width:100%;text-align:center;}
+  .gate-card .brand-mark{margin:0 auto 14px;background:linear-gradient(135deg,var(--navy),var(--teal));color:white;}
+  .gate-card h2{color:var(--navy);margin:0 0 6px;font-size:1.5rem}
+  .gate-card p{color:var(--muted);margin:0 0 16px;line-height:1.5}
+  .gate-card input{width:100%;font:inherit;border:2px solid #d6e4f1;border-radius:14px;padding:12px;text-align:center;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--navy)}
+  .gate-card input:focus{outline:none;border-color:var(--blue)}
+  .gate-card button{width:100%;margin-top:12px;padding:12px;font-size:1rem;background:linear-gradient(135deg,var(--blue),var(--teal));border:none}
+  .gate-error{display:none;margin-top:12px;background:#fff2f2;border:2px solid #ffc9c7;color:#813431;border-radius:14px;padding:9px;font-weight:750;font-size:.9rem}
+  .gate-error.show{display:block}
+  .gate-foot{margin-top:14px;font-size:.8rem;color:var(--muted)}
+  @media print{body{background:white}.app{max-width:none;padding:0}.tabs,.print-hide,button{display:none!important}.panel{display:block!important;page-break-after:always}.card{box-shadow:none;border-color:#b9cad9}.canvas-wrap{break-inside:avoid}header{box-shadow:none;border-radius:0}.panel:not(.active){display:block}.span-8,.span-7,.span-6,.span-5,.span-4,.span-3,.span-12{grid-column:span 12}}
+</style>
+</head>
+<body class="locked">
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="brand-mark">PF</div>
+    <h2>PhysicsFlow Interactive Lab</h2>
+    <p>Electric Fields &amp; Electric Potential<br>Enter your access code to open the app.</p>
+    <input id="gateInput" type="password" placeholder="ACCESS CODE" autocomplete="off" aria-label="Access code" />
+    <button id="gateBtn" type="button">Unlock App</button>
+    <div class="gate-error" id="gateError">That code is not correct. Check your resource download and try again.</div>
+    <div class="gate-foot">Access codes are provided with your PhysicsFlow purchase.</div>
+  </div>
+</div>
+<div class="app">
+  <header>
+    <div class="brand"><div class="brand-mark">PF</div><div>PhysicsFlow Interactive Lab</div></div>
+    <h1>Electric Fields & Electric Potential</h1>
+    <div class="subtitle">Explore field direction, field strength, voltage, uniform fields, and equipotential maps through visual simulations and guided challenges.</div>
+  </header>
+
+  <nav class="tabs print-hide" aria-label="App sections">
+    <button class="tab active" data-tab="learn">Learn</button>
+    <button class="tab" data-tab="fieldlines">Field Lines Lab</button>
+    <button class="tab" data-tab="uniform">Uniform Field</button>
+    <button class="tab" data-tab="potential">Potential Lab</button>
+    <button class="tab" data-tab="equipotential">Equipotential Map</button>
+    <button class="tab" data-tab="challenge">Challenge</button>
+    <button class="tab" data-tab="quiz">Quiz</button>
+  </nav>
+
+  <section id="learn" class="panel active">
+    <div class="grid">
+      <div class="card span-12">
+        <h2>Start Here: Big Ideas</h2>
+        <p>Electric fields describe how a source charge affects the space around it. Electric potential describes energy per unit charge. Use this app to connect the diagrams, equations, and calculations.</p>
+        <div class="formula-grid">
+          <div class="formula"><strong>Electric Field</strong><div class="eq">E = F / q</div><p class="small">Field strength is force per unit charge. Unit: N/C.</p></div>
+          <div class="formula"><strong>Point Charge Field</strong><div class="eq">E = k|Q| / r²</div><p class="small">Field strength decreases with distance squared.</p></div>
+          <div class="formula"><strong>Electric Potential</strong><div class="eq">V = W / q</div><p class="small">Voltage is energy transferred per coulomb. Unit: V = J/C.</p></div>
+          <div class="formula"><strong>Point Charge Potential</strong><div class="eq">V = kQ / r</div><p class="small">Potential can be + or −. Use the sign of Q.</p></div>
+          <div class="formula"><strong>Uniform Field</strong><div class="eq">E = ΔV / d</div><p class="small">Between parallel plates, E is nearly constant. Unit: V/m.</p></div>
+        </div>
+        <div class="callout" style="margin-top:14px"><strong>Constant:</strong> k = 8.99 × 10⁹ N·m²/C². Always convert cm → m and μC → C before substituting.</div>
+      </div>
+      <div class="card span-4">
+        <h3>1. Field Direction</h3>
+        <div class="mini-card"><div class="icon">+</div><div><strong>Positive source charge</strong><br>Field lines point outward.</div></div>
+        <div style="height:10px"></div>
+        <div class="mini-card"><div class="icon">−</div><div><strong>Negative source charge</strong><br>Field lines point inward.</div></div>
+      </div>
+      <div class="card span-4">
+        <h3>2. Field Lines</h3>
+        <p>Electric field lines show the direction of force on a <strong>positive test charge</strong>.</p>
+        <div class="note">Closer field lines mean a stronger electric field.</div>
+      </div>
+      <div class="card span-4">
+        <h3>3. Potential</h3>
+        <p>Electric potential tells how much energy each coulomb has because of its position in an electric field.</p>
+        <div class="note">Voltage is not energy. Voltage is energy per unit charge.</div>
+      </div>
+      <div class="card span-6">
+        <h3>Common Mistakes to Avoid</h3>
+        <ul>
+          <li>Do not define field direction using a negative test charge.</li>
+          <li>Do not draw field lines crossing each other.</li>
+          <li>Do not confuse electric potential V with potential energy U.</li>
+          <li>Do not forget to convert cm to m and μC to C in calculations.</li>
+        </ul>
+      </div>
+      <div class="card span-6">
+        <h3>How to Use the App</h3>
+        <div class="steps">
+          <div class="step">Use the Field Lines Lab to observe direction and strength.</div>
+          <div class="step">Use the Uniform Field tab to connect voltage and plate separation.</div>
+          <div class="step">Use the Potential Lab to compare energy changes for positive and negative charges.</div>
+          <div class="step">Use the Equipotential Map to connect voltage maps with field direction.</div>
+          <div class="step">Finish with the Challenge and Quiz tabs.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="fieldlines" class="panel">
+    <div class="grid">
+      <div class="card span-8">
+        <h2>Field Lines Lab</h2>
+        <p>Choose a charge pattern. The arrows show the electric field direction for a positive test charge. Longer arrows and tighter spacing show stronger fields.</p>
+        <div class="canvas-wrap"><canvas id="fieldCanvas" width="760" height="430" aria-label="Electric field line simulation"></canvas>
+          <div class="legend"><span class="key"><span class="swatch pos"></span>Positive charge</span><span class="key"><span class="swatch neg"></span>Negative charge</span><span class="key"><span class="swatch field"></span>Electric field direction</span></div>
+        </div>
+      </div>
+      <div class="card span-4">
+        <h3>Controls</h3>
+        <div class="control"><label for="pattern">Charge pattern</label><select id="pattern"><option value="singlePlus">Single positive charge</option><option value="singleMinus">Single negative charge</option><option value="dipole">Opposite charges</option><option value="likePlus">Two positive charges</option><option value="likeMinus">Two negative charges</option></select></div>
+        <div class="control"><label for="fieldView">View style</label><select id="fieldView"><option value="lines">Field lines (curves)</option><option value="vectors">Vector map (arrows)</option></select></div>
+        <div class="control"><label><span>Charge 1 size |Q<sub>1</sub>|</span> <span id="fieldChargeLabel">4 μC</span></label><input id="fieldCharge" type="range" min="1" max="8" step="1" value="4"></div>
+        <div class="control" id="q2Control" style="display:none"><label><span>Charge 2 size |Q<sub>2</sub>|</span> <span id="fieldCharge2Label">4 μC</span></label><input id="fieldCharge2" type="range" min="1" max="8" step="1" value="4"></div>
+        <div class="control"><label>Arrow density <span id="densityLabel">medium</span></label><input id="density" type="range" min="1" max="3" step="1" value="2"></div>
+        <div class="button-row"><button class="secondary" id="resetField">Reset</button></div>
+        <div class="result" id="fieldObservation">Observation: Positive charges create outward fields. Negative charges create inward fields.</div>
+        <div class="callout"><strong>Physics Tip:</strong> The electric field at any point is the direction a positive test charge would be pushed. Field lines show the direction of the <em>force</em> — they are not the path a moving charge would follow.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="uniform" class="panel">
+    <div class="grid">
+      <div class="card span-7">
+        <h2>Uniform Field Simulator</h2>
+        <p>Parallel plates create a nearly uniform electric field. Adjust the voltage and plate separation to see how field strength changes.</p>
+        <div class="canvas-wrap"><canvas id="uniformCanvas" width="720" height="430" aria-label="Uniform electric field between plates"></canvas>
+          <div class="legend"><span class="key"><span class="swatch platep"></span>Positive plate / high potential</span><span class="key"><span class="swatch platen"></span>Negative plate / low potential</span><span class="key"><span class="swatch field"></span>Field direction</span></div>
+        </div>
+      </div>
+      <div class="card span-5">
+        <h3>Controls & Calculations</h3>
+        <div class="control"><label>Potential difference ΔV <span id="deltaVLabel">120 V</span></label><input id="deltaV" type="range" min="20" max="500" step="10" value="120"></div>
+        <div class="control"><label>Plate separation d <span id="plateDLabel">0.040 m</span></label><input id="plateD" type="range" min="1" max="20" step="1" value="4"></div>
+        <div class="control"><label>Test charge q <span id="testQLabel">2.0 μC</span></label><input id="testQ" type="range" min="-5" max="5" step="0.5" value="2"></div>
+        <div class="equation">E = ΔV / d</div>
+        <div class="result" id="uniformResult"></div>
+        <div class="button-row"><button id="flipPlates" class="orange">Flip plate polarity</button><button class="secondary" id="uniformReset">Reset</button></div>
+        <div class="callout"><strong>Important:</strong> 1 N/C = 1 V/m. The force on a charge is F = qE.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="potential" class="panel">
+    <div class="grid">
+      <div class="card span-7">
+        <h2>Electric Potential Lab</h2>
+        <p>Compare two locations around a point charge. Potential depends on the source charge and distance from the source.</p>
+        <div class="canvas-wrap"><canvas id="potentialCanvas" width="720" height="430" aria-label="Electric potential around a point charge"></canvas>
+          <div class="legend"><span class="key"><span class="swatch pos"></span>Positive source</span><span class="key"><span class="swatch neg"></span>Negative source</span><span class="key"><span class="swatch equip"></span>Potential levels</span></div>
+        </div>
+      </div>
+      <div class="card span-5">
+        <h3>Controls & Results</h3>
+        <div class="control"><label>Source charge Q <span id="sourceQLabel">+3 μC</span></label><input id="sourceQ" type="range" min="1" max="12" step="1" value="9"></div>
+        <div class="control"><label><span>Position A distance r<sub>A</sub></span> <span id="rALabel">0.20 m</span></label><input id="rA" type="range" min="10" max="80" step="5" value="20"></div>
+        <div class="control"><label><span>Position B distance r<sub>B</sub></span> <span id="rBLabel">0.50 m</span></label><input id="rB" type="range" min="10" max="80" step="5" value="50"></div>
+        <div class="control"><label>Moving charge q <span id="moveQLabel">+1.0 μC</span></label><input id="moveQ" type="range" min="-5" max="5" step="0.5" value="1"></div>
+        <div class="equation">V = kQ / r &nbsp;&nbsp; and &nbsp;&nbsp; ΔU = qΔV</div>
+        <div class="result" id="potentialResult"></div>
+        <div class="callout"><strong>Remember:</strong> Electric potential V is a property of the location. Electric potential energy U depends on the moving charge q.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="equipotential" class="panel">
+    <div class="grid">
+      <div class="card span-8">
+        <h2>Equipotential Map</h2>
+        <p>Equipotential lines connect points with the same electric potential. Electric field lines cross equipotential lines at 90°.</p>
+        <div class="canvas-wrap"><canvas id="equipCanvas" width="760" height="430" aria-label="Equipotential map simulation"></canvas>
+          <div class="legend"><span class="key"><span class="swatch equip"></span>Equipotential lines</span><span class="key"><span class="swatch field"></span>Electric field lines</span><span class="key"><span class="swatch pos"></span>High potential</span><span class="key"><span class="swatch neg"></span>Low potential</span></div>
+        </div>
+      </div>
+      <div class="card span-4">
+        <h3>Map Controls</h3>
+        <div class="control"><label for="equipMode">Map type</label><select id="equipMode"><option value="point">Single positive point charge</option><option value="plates">Parallel plates</option><option value="dipole">Opposite charges</option></select></div>
+        <div class="result" id="equipResult"></div>
+        <div class="note">If equipotential lines are closer together, the electric field is stronger because the same voltage change happens over a smaller distance.</div>
+      </div>
+      <div class="card span-12">
+        <h3>Quick Check</h3>
+        <div class="two-col">
+          <div class="challenge"><strong>Question:</strong> What is the work done by the electric field when a charge moves along one equipotential line?<div class="button-row"><button data-answer="zero" class="equipCheck">Check</button></div><div id="equipCheck1" class="small"></div></div>
+          <div class="challenge"><strong>Question:</strong> How do electric field lines meet equipotential lines?<div class="button-row"><button data-answer="perpendicular" class="equipCheck">Check</button></div><div id="equipCheck2" class="small"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="challenge" class="panel">
+    <div class="grid">
+      <div class="card span-12">
+        <h2>Guided Challenge Problems</h2>
+        <p>Type your answer and press <strong>Check</strong> to earn a point — small rounding differences are accepted. Revealing a solution first means that problem no longer scores, but the worked solutions are always there to help. Designed for review, homework, stations, or independent learning.</p>
+        <div class="score-card" id="challengeScore">Challenge score: <strong>0/5</strong></div>
+        <div class="progress"><div id="challengeBar" class="bar"></div></div>
+      </div>
+      <div class="card span-4 challenge">
+        <h3>Challenge 1 <span class="tag">E = F/q</span></h3>
+        <p>A 3.0 μC test charge experiences a 0.018 N force. Calculate the electric field strength.</p>
+        <div class="button-row"><input type="number" step="any" id="ans1" placeholder="Answer in N/C" style="flex:1;min-width:110px"><button class="checkAns" data-idx="1">Check</button><button class="showSolution secondary" data-target="sol1">Reveal</button></div><div id="chk1" class="small" style="margin-top:6px"></div>
+        <div id="sol1" class="result" style="display:none">Convert: q = 3.0 × 10⁻⁶ C. <br>E = F/q = 0.018 ÷ (3.0 × 10⁻⁶) = <strong>6.0 × 10³ N/C</strong>.</div>
+      </div>
+      <div class="card span-4 challenge">
+        <h3>Challenge 2 <span class="tag">E = ΔV/d</span></h3>
+        <p>Two plates have a potential difference of 240 V and are separated by 0.060 m. Find the uniform field.</p>
+        <div class="button-row"><input type="number" step="any" id="ans2" placeholder="Answer in V/m" style="flex:1;min-width:110px"><button class="checkAns" data-idx="2">Check</button><button class="showSolution secondary" data-target="sol2">Reveal</button></div><div id="chk2" class="small" style="margin-top:6px"></div>
+        <div id="sol2" class="result" style="display:none">E = ΔV/d = 240 ÷ 0.060 = <strong>4.0 × 10³ V/m</strong>. This is also 4.0 × 10³ N/C.</div>
+      </div>
+      <div class="card span-4 challenge">
+        <h3>Challenge 3 <span class="tag">V = W/q</span></h3>
+        <p>Moving a charge requires 0.045 J of energy. If the charge is 5.0 mC, calculate the potential difference.</p>
+        <div class="button-row"><input type="number" step="any" id="ans3" placeholder="Answer in V" style="flex:1;min-width:110px"><button class="checkAns" data-idx="3">Check</button><button class="showSolution secondary" data-target="sol3">Reveal</button></div><div id="chk3" class="small" style="margin-top:6px"></div>
+        <div id="sol3" class="result" style="display:none">Convert: q = 5.0 × 10⁻³ C. <br>V = W/q = 0.045 ÷ 0.0050 = <strong>9.0 V</strong>.</div>
+      </div>
+      <div class="card span-6 challenge">
+        <h3>Challenge 4 <span class="tag">V = kQ/r</span></h3>
+        <p>Calculate the electric potential 0.30 m from a +2.0 μC point charge. (k = 8.99 × 10⁹ N·m²/C²)</p>
+        <div class="button-row"><input type="number" step="any" id="ans4" placeholder="Answer in V" style="flex:1;min-width:110px"><button class="checkAns" data-idx="4">Check</button><button class="showSolution secondary" data-target="sol4">Reveal</button></div><div id="chk4" class="small" style="margin-top:6px"></div>
+        <div id="sol4" class="result" style="display:none">V = kQ/r = (8.99 × 10⁹)(2.0 × 10⁻⁶) ÷ 0.30 ≈ <strong>6.0 × 10⁴ V</strong>. <br>A positive source charge gives a positive potential.</div>
+      </div>
+      <div class="card span-6 challenge">
+        <h3>Challenge 5 <span class="tag">ΔU = qΔV</span></h3>
+        <p>A +4.0 μC charge moves to a point where the potential is 150 V lower. Find the change in its potential energy, and state what happens to its speed if no other forces act.</p>
+        <div class="button-row"><input type="number" step="any" id="ans5" placeholder="Answer in J" style="flex:1;min-width:110px"><button class="checkAns" data-idx="5">Check</button><button class="showSolution secondary" data-target="sol5">Reveal</button></div><div id="chk5" class="small" style="margin-top:6px"></div>
+        <div id="sol5" class="result" style="display:none">ΔU = qΔV = (4.0 × 10⁻⁶)(−150) = <strong>−6.0 × 10⁻⁴ J</strong>. <br>Potential energy decreases, so kinetic energy increases — the charge speeds up.</div>
+      </div>
+      <div class="card span-12">
+        <h3>Integrated Extension</h3>
+        <p>A positive charge moves from high potential to low potential between two plates. Use the field direction, force direction, and energy ideas to explain what happens.</p>
+        <textarea id="extensionText" style="width:100%;min-height:110px;border-radius:18px;border:2px solid #d6e4f1;padding:12px;font:inherit" placeholder="Write your explanation here..."></textarea>
+        <div class="button-row"><button id="sampleExtension" class="teal">Show sample answer</button><button id="clearExtension" class="secondary">Clear</button></div>
+        <div id="extensionSample" class="result" style="display:none">Sample answer: The electric field points from the positive plate/high potential side toward the negative plate/low potential side. A positive charge feels a force in the same direction as the field, so it accelerates toward lower potential. Its electric potential energy decreases, and that energy can become kinetic energy.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="quiz" class="panel">
+    <div class="grid">
+      <div class="card span-12">
+        <h2>Quick Quiz</h2>
+        <p>Choose the best answer for each question. Submit to see your score and feedback.</p>
+        <div id="quizBox"></div>
+        <div class="button-row"><button id="submitQuiz">Submit Quiz</button><button id="resetQuiz" class="secondary">Reset Quiz</button></div>
+        <div id="quizScore" class="score-card" style="display:none"></div>
+        <div class="progress"><div id="quizBar" class="bar"></div></div>
+      </div>
+    </div>
+  </section>
+</div>
+<script>
+(function(){
+  'use strict';
+
+  /* ---------- Access gate (SHA-256, sessionStorage) ---------- */
+  const GATE_HASH = '72f60175905d2f94147b5cbc9acd448d88fbea8b8cd060e3c19fb1b8e9f8b489';
+  const GATE_KEY = 'pf_fields_potential_unlocked';
+  async function sha256Hex(text){
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+  function unlock(){
+    document.body.classList.remove('locked');
+    setTimeout(drawAll,30);
+  }
+  async function tryUnlock(){
+    const input = document.getElementById('gateInput');
+    const err = document.getElementById('gateError');
+    const code = (input.value||'').trim().toUpperCase();
+    if(!code) return;
+    let hash = '';
+    try { hash = await sha256Hex(code); } catch(e) { hash = ''; }
+    if(hash === GATE_HASH){
+      try { sessionStorage.setItem(GATE_KEY,'1'); } catch(e){}
+      err.classList.remove('show');
+      unlock();
+    } else {
+      err.classList.add('show');
+      input.select();
+    }
+  }
+  document.getElementById('gateBtn').addEventListener('click',tryUnlock);
+  document.getElementById('gateInput').addEventListener('keydown',e=>{ if(e.key==='Enter') tryUnlock(); });
+  try { if(sessionStorage.getItem(GATE_KEY)==='1') unlock(); } catch(e){}
+
+  const k = 8.99e9;
+  const $ = id => document.getElementById(id);
+  const SUP = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'};
+  const fmt = (n, sig=3) => {
+    if (!Number.isFinite(n)) return '—';
+    if (n === 0) return '0';
+    const abs = Math.abs(n);
+    if (abs >= 1e4 || abs < 0.01) {
+      const [mant, exp] = n.toExponential(sig-1).split('e');
+      const supExp = String(Number(exp)).split('').map(ch=>SUP[ch]||ch).join('');
+      return mant + ' × 10' + supExp;
+    }
+    return Number(n.toPrecision(sig)).toString();
+  };
+  const clamp = (v,min,max)=>Math.max(min,Math.min(max,v));
+
+  document.querySelectorAll('.tab').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      $(btn.dataset.tab).classList.add('active');
+      setTimeout(drawAll,20);
+    });
+  });
+
+  function setupCanvas(canvas){
+    if(canvas.offsetParent===null) return null; // hidden tab — skip drawing entirely
+    // Remember the original aspect ratio once; canvas.width/height get overwritten below.
+    if(!canvas.dataset.aspect) canvas.dataset.aspect = (canvas.height/canvas.width).toString();
+    const ctx=canvas.getContext('2d');
+    const rect=canvas.getBoundingClientRect();
+    const ratio=window.devicePixelRatio||1;
+    const cssW = rect.width || 760;
+    const cssH = cssW * Number(canvas.dataset.aspect);
+    const targetW = Math.round(cssW*ratio), targetH = Math.round(cssH*ratio);
+    if(canvas.width!==targetW || canvas.height!==targetH){
+      canvas.style.height = cssH+'px';
+      canvas.width = targetW;
+      canvas.height = targetH;
+    }
+    ctx.setTransform(ratio,0,0,ratio,0,0);
+    ctx.clearRect(0,0,cssW,cssH);
+    return {ctx,w:cssW,h:cssH};
+  }
+  function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+  function arrow(ctx,x1,y1,x2,y2,color='#16a6a6',width=2.2){
+    const ang=Math.atan2(y2-y1,x2-x1), len=Math.hypot(x2-x1,y2-y1);
+    if(len<2)return;
+    ctx.save();ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=width;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+    const head=Math.min(12,Math.max(7.5,len*.38));
+    ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-head*Math.cos(ang-Math.PI/6),y2-head*Math.sin(ang-Math.PI/6));ctx.lineTo(x2-head*Math.cos(ang+Math.PI/6),y2-head*Math.sin(ang+Math.PI/6));ctx.closePath();ctx.fill();ctx.restore();
+  }
+  function drawCharge(ctx,x,y,q,label){
+    const positive=q>0;
+    ctx.save();
+    ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.fillStyle=positive?'#e85d5a':'#2076d2';ctx.fill();
+    ctx.lineWidth=3;ctx.strokeStyle='white';ctx.stroke();
+    ctx.fillStyle='white';ctx.font='900 23px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(positive?'+':'−',x,y+1);
+    if(label){ctx.fillStyle='#12355b';ctx.font='800 13px Arial';ctx.fillText(label,x,y+37);}
+    ctx.restore();
+  }
+  function drawBackgroundGrid(ctx,w,h){
+    ctx.save();ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle='#edf4fa';ctx.lineWidth=1;
+    for(let x=0;x<w;x+=38){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+    for(let y=0;y<h;y+=38){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+    ctx.restore();
+  }
+
+  function getChargesForPattern(pattern,q1,q2,w,h){
+    if(pattern==='singlePlus') return [{x:w/2,y:h/2,q:q1}];
+    if(pattern==='singleMinus') return [{x:w/2,y:h/2,q:-q1}];
+    if(pattern==='dipole') return [{x:w*.35,y:h/2,q:q1},{x:w*.65,y:h/2,q:-q2}];
+    if(pattern==='likePlus') return [{x:w*.35,y:h/2,q:q1},{x:w*.65,y:h/2,q:q2}];
+    return [{x:w*.35,y:h/2,q:-q1},{x:w*.65,y:h/2,q:-q2}];
+  }
+  function fieldAt(x,y,charges){
+    let Ex=0,Ey=0;
+    charges.forEach(c=>{
+      const dx=x-c.x,dy=y-c.y;let r2=dx*dx+dy*dy;r2=Math.max(r2,450);
+      const r=Math.sqrt(r2);const s=c.q/(r2*r);
+      Ex+=s*dx;Ey+=s*dy;
+    });
+    return {Ex,Ey,mag:Math.hypot(Ex,Ey)};
+  }
+  function traceFieldLineView(ctx,w,h,charges,dens){
+    // Textbook field lines, two passes:
+    //  1) trace forward along E from each positive charge, recording the angle
+    //     at which any line arrives at a negative charge;
+    //  2) trace backward (against E) from each negative charge, but only from
+    //     seed angles not already covered by an arriving line — so negatives
+    //     receive lines from all sides without double-drawing.
+    // Line count per charge ∝ |Q|.
+    const mult=dens===1?0.7:dens===2?1:1.4;
+    const nFor=c=>Math.max(6,Math.round((4+2*Math.abs(c.q))*mult));
+    const arrivals=charges.map(()=>[]);
+    const angDiff=(a,b)=>{const d=Math.abs(a-b)%(Math.PI*2);return Math.min(d,Math.PI*2-d);};
+    ctx.save();ctx.strokeStyle='#16a6a6';ctx.lineWidth=2;ctx.lineCap='round';
+    function trace(seed,a,backward){
+      let x=seed.x+Math.cos(a)*26, y=seed.y+Math.sin(a)*26;
+      const pts=[[x,y]]; let end='steps', endIdx=-1, endAngle=0;
+      let ckx=x, cky=y; // stall checkpoint (detects oscillation near E≈0 null points)
+      for(let s=0;s<6000;s++){
+        const E=fieldAt(x,y,charges); const m=E.mag||1e-12;
+        const sgn=backward?-1:1;
+        x+=sgn*E.Ex/m*2.6; y+=sgn*E.Ey/m*2.6;
+        pts.push([x,y]);
+        const hit=charges.findIndex(cc=>cc.q*seed.q<0 && Math.hypot(x-cc.x,y-cc.y)<25);
+        if(hit>=0){end='charge';endIdx=hit;endAngle=Math.atan2(y-charges[hit].y,x-charges[hit].x);break;}
+        if(x<6||x>w-6||y<6||y>h-6){end='bounds';break;}
+        if(s%250===249){
+          if(Math.hypot(x-ckx,y-cky)<12){end='stall';break;}
+          ckx=x; cky=y;
+        }
+      }
+      return {pts,end,endIdx,endAngle};
+    }
+    function drawTraced(pts){
+      ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);
+      for(const p of pts) ctx.lineTo(p[0],p[1]);
+      ctx.stroke();
+      [0.32,0.68].forEach(f=>{
+        const idx=Math.floor(pts.length*f);
+        if(idx>3 && idx<pts.length-3){
+          const p=pts[idx];
+          const E=fieldAt(p[0],p[1],charges); const m=E.mag||1e-12;
+          arrow(ctx,p[0]-E.Ex/m*7,p[1]-E.Ey/m*7,p[0]+E.Ex/m*7,p[1]+E.Ey/m*7,'#16a6a6',2);
+        }
+      });
+    }
+    // Pass 1: forward from positive charges
+    charges.forEach(c=>{
+      if(c.q<=0) return;
+      const n=nFor(c);
+      for(let i=0;i<n;i++){
+        const t=trace(c,(i+0.5)/n*Math.PI*2,false);
+        drawTraced(t.pts);
+        if(t.end==='charge') arrivals[t.endIdx].push(t.endAngle);
+      }
+    });
+    // Pass 2: backward from negative charges at uncovered angles
+    charges.forEach((c,ci)=>{
+      if(c.q>=0) return;
+      const n=nFor(c);
+      for(let i=0;i<n;i++){
+        const a=(i+0.5)/n*Math.PI*2;
+        if(arrivals[ci].some(b=>angDiff(a,b)<Math.PI/n)) continue; // already fed by a forward line
+        const t=trace(c,a,true);
+        if(t.end==='stall'||t.end==='steps') continue; // never draw a line that stops mid-canvas
+        // a line hugging a positive charge is a numerical duplicate of one of that charge's own lines
+        if(t.pts.some(p=>charges.some(cc=>cc.q>0 && Math.hypot(p[0]-cc.x,p[1]-cc.y)<40))) continue;
+        drawTraced(t.pts);
+      }
+    });
+    ctx.restore();
+  }
+  function drawFieldLines(){
+    const canvas=$('fieldCanvas'); if(!canvas) return;
+    const _s=setupCanvas(canvas); if(!_s) return; const {ctx,w,h}=_s;drawBackgroundGrid(ctx,w,h);
+    const pattern=$('pattern').value;
+    const view=$('fieldView').value;
+    const q=Number($('fieldCharge').value);
+    const q2=Number($('fieldCharge2').value);
+    const twoCharges = pattern!=='singlePlus' && pattern!=='singleMinus';
+    $('q2Control').style.display = twoCharges?'':'none';
+    $('fieldChargeLabel').textContent=q+' μC';
+    $('fieldCharge2Label').textContent=q2+' μC';
+    const dens=Number($('density').value);
+    $('densityLabel').textContent=dens===1?'low':dens===2?'medium':'high';
+    const charges=getChargesForPattern(pattern,q,q2,w,h);
+    if(view==='lines'){
+      traceFieldLineView(ctx,w,h,charges,dens);
+    } else {
+      const spacing=dens===1?92:dens===2?68:52;
+      for(let x=spacing/2;x<w;x+=spacing){
+        for(let y=spacing/2;y<h;y+=spacing){
+          if(charges.some(c=>Math.hypot(x-c.x,y-c.y)<40)) continue;
+          const E=fieldAt(x,y,charges); const mag=E.mag||1e-12;
+          // log-scale the true field magnitude: mag = q/r² spans ~6e-6 … 3e-3 across the canvas
+          const t=clamp((Math.log10(mag)+5.4)/2.9,0,1);
+          const len=10+t*26;        // 10 … 36 px
+          const wdt=1.2+t*2.6;      // 1.2 … 3.8 px
+          const ux=E.Ex/mag,uy=E.Ey/mag;
+          arrow(ctx,x-ux*len*.5,y-uy*len*.5,x+ux*len*.5,y+uy*len*.5,'#16a6a6',wdt);
+        }
+      }
+    }
+    charges.forEach((c,i)=>drawCharge(ctx,c.x,c.y,c.q,(c.q>0?'+':'−')+'Q'+(charges.length>1?(i===0?'₁':'₂'):'')));
+    ctx.save();ctx.fillStyle='#12355b';ctx.font='900 18px Arial';ctx.fillText(view==='lines'?'Electric field line map':'Electric field vector map',18,26);ctx.restore();
+    const obs={singlePlus:'Field points outward from the positive source charge.',singleMinus:'Field points inward toward the negative source charge.',dipole:'Field points from the positive charge toward the negative charge.',likePlus:'Between like positive charges, fields oppose and bend away from each other.',likeMinus:'Between like negative charges, fields point inward toward each charge and do not connect.'};
+    const view2=$('fieldView').value;
+    let strengthNote;
+    if(view2==='lines'){
+      const asym = pattern==='dipole'&&q!==q2 ? (q<q2
+        ? ' Because |Q₂| > |Q₁|, every line from +Q₁ must end on −Q₂ — some bend around dramatically to get there — and −Q₂ also collects extra lines from far away.'
+        : ' Because |Q₁| > |Q₂|, only some of +Q₁\u2019s lines can end on −Q₂; the rest continue off the map toward far away.') : '';
+      strengthNote = twoCharges
+        ? ` Line counts scale with each charge: |Q₁| = ${q} μC, |Q₂| = ${q2} μC — ${q===q2?'equal charges have equal numbers of lines.':'the larger charge has more field lines attached to it.'}`+asym
+        : ` With |Q| = ${q} μC the map draws ${q>=6?'many':q>=3?'a moderate number of':'few'} lines — the number of field lines is proportional to the charge, and lines packed closer together mean a stronger field.`;
+    } else {
+      strengthNote = twoCharges
+        ? ` Arrow length and thickness show the combined field of both charges — notice the arrows are longer near the ${q===q2?'charges':(q>q2?'larger charge Q₁':'larger charge Q₂')}.`
+        : ` With |Q| = ${q} μC, ${q>=6?'the long, thick arrows show a strong field':q>=3?'medium arrows show a moderate field':'the short, thin arrows show a weak field'} — arrows shrink quickly with distance (inverse-square law).`;
+    }
+    $('fieldObservation').innerHTML='<strong>Observation:</strong> '+obs[pattern]+strengthNote;
+  }
+  $('resetField').addEventListener('click',()=>{$('pattern').value='singlePlus';$('fieldView').value='lines';$('fieldCharge').value=4;$('fieldCharge2').value=4;$('density').value=2;drawFieldLines();});
+  ['pattern','fieldView','fieldCharge','fieldCharge2','density'].forEach(id=>$(id).addEventListener('input',drawFieldLines));
+
+  let plateFlip=false;
+  function drawUniform(){
+    const canvas=$('uniformCanvas'); if(!canvas) return;
+    const _s=setupCanvas(canvas); if(!_s) return; const {ctx,w,h}=_s;drawBackgroundGrid(ctx,w,h);
+    const dv=Number($('deltaV').value); const dcm=Number($('plateD').value); const dm=dcm/100; const qmicro=Number($('testQ').value); const q=qmicro*1e-6; const E=dv/dm; const F=q*E;
+    $('deltaVLabel').textContent=dv+' V'; $('plateDLabel').textContent=dm.toFixed(3)+' m'; $('testQLabel').textContent=(qmicro>=0?'+':'')+qmicro.toFixed(1)+' μC';
+    const leftPlus=!plateFlip; const top=h*.16,bottom=h*.84;
+    const gapPx=w*(.28+(dcm-1)/19*.34); // plate separation on screen follows d
+    const leftX=w*.5-gapPx/2, rightX=w*.5+gapPx/2;
+    const lw=clamp(0.8+Math.log10(E)*0.55,1.6,3.8); // arrow weight follows field strength
+    ctx.save();
+    roundRect(ctx,leftX-18,top,36,bottom-top,16);ctx.fillStyle=leftPlus?'#ff9f1c':'#2076d2';ctx.fill();
+    roundRect(ctx,rightX-18,top,36,bottom-top,16);ctx.fillStyle=leftPlus?'#2076d2':'#ff9f1c';ctx.fill();
+    ctx.fillStyle='white';ctx.font='900 24px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(leftPlus?'+':'−',leftX,top+30);ctx.fillText(leftPlus?'−':'+',rightX,top+30);
+    ctx.fillStyle='#12355b';ctx.font='800 13px Arial';ctx.fillText(leftPlus?'High V':'Low V',leftX,bottom+24);ctx.fillText(leftPlus?'Low V':'High V',rightX,bottom+24);
+    const dir=leftPlus?1:-1;
+    for(let y=top+35;y<bottom;y+=42){arrow(ctx,dir>0?leftX+32:rightX-32,y,dir>0?rightX-32:leftX+32,y,'#16a6a6',lw)}
+    ctx.setLineDash([6,5]);ctx.strokeStyle='#7567d9';ctx.lineWidth=2;
+    for(let i=1;i<=4;i++){const x=leftX+(rightX-leftX)*i/5;ctx.beginPath();ctx.moveTo(x,top+12);ctx.lineTo(x,bottom-12);ctx.stroke();}
+    ctx.setLineDash([]);
+    const qx=w*.50,qy=h*.50;
+    ctx.beginPath();ctx.arc(qx,qy,15,0,Math.PI*2);ctx.fillStyle=qmicro>=0?'#e85d5a':'#2076d2';ctx.fill();ctx.strokeStyle='white';ctx.lineWidth=3;ctx.stroke();ctx.fillStyle='white';ctx.font='900 17px Arial';ctx.fillText(qmicro>=0?'+':'−',qx,qy+1);
+    if(qmicro!==0){
+      const Fmag=Math.abs(F);
+      // |F| spans ~5×10⁻⁵ … 0.25 N on these sliders; log scaling keeps every value visible
+      const tF=clamp((Math.log10(Fmag)+4.4)/3.8,0,1);
+      const maxA=clamp(gapPx/2-30,34,112);
+      const alen=10+tF*(maxA-10);
+      const forceDir=(qmicro>0?dir:-dir);
+      arrow(ctx,qx,qy, qx+forceDir*alen, qy, '#e85d5a',2+tF*2.2);
+      ctx.fillStyle='#e85d5a';ctx.font='900 14px Arial';ctx.fillText('F on q',qx+forceDir*Math.min(alen+18,gapPx/2-8),qy-14);
+    }
+    else {ctx.fillStyle='#62748a';ctx.font='900 13px Arial';ctx.fillText('q = 0 → F = 0',qx,qy-26);}
+    ctx.fillStyle='#12355b';ctx.font='900 18px Arial';ctx.textAlign='left';ctx.fillText('Uniform field between plates',18,26);
+    ctx.restore();
+    const direction = leftPlus ? 'from the positive left plate to the negative right plate' : 'from the positive right plate to the negative left plate';
+    const fdir = qmicro===0 ? 'zero because q = 0' : (qmicro>0 ? 'same direction as E' : 'opposite direction to E');
+    const energyLine = qmicro===0 ? '' : `<br>Crossing the full gap: energy transferred = |q|ΔV = <strong>${fmt(Math.abs(q)*dv)} J</strong>.`;
+    $('uniformResult').innerHTML = `<strong>E = ΔV/d = ${dv} V / ${dm.toFixed(3)} m = ${fmt(E)} V/m</strong><br>`+
+      `This is also <strong>${fmt(E)} N/C</strong>.<br>`+
+      `Field direction: ${direction}.<br>`+
+      `Force on the test charge: F = qE = <strong>${fmt(F)} N</strong>, ${fdir}.`+energyLine;
+  }
+  $('flipPlates').addEventListener('click',()=>{plateFlip=!plateFlip;drawUniform();});
+  $('uniformReset').addEventListener('click',()=>{plateFlip=false;$('deltaV').value=120;$('plateD').value=4;$('testQ').value=2;drawUniform();});
+  ['deltaV','plateD','testQ'].forEach(id=>$(id).addEventListener('input',drawUniform));
+
+  function drawPotential(){
+    const canvas=$('potentialCanvas'); if(!canvas)return;
+    const _s=setupCanvas(canvas); if(!_s) return; const {ctx,w,h}=_s;drawBackgroundGrid(ctx,w,h);
+    const sq=Number($('sourceQ').value); // 1–6 → −6…−1 μC, 7–12 → +1…+6 μC (skips 0)
+    const Qmicro = sq<=6 ? sq-7 : sq-6;
+    const Q=Qmicro*1e-6; const rAcm=Number($('rA').value), rBcm=Number($('rB').value); const rA=rAcm/100,rB=rBcm/100; const qmicro=Number($('moveQ').value); const q=qmicro*1e-6;
+    $('sourceQLabel').textContent=(Qmicro>0?'+':'')+Qmicro+' μC';$('rALabel').textContent=rA.toFixed(2)+' m';$('rBLabel').textContent=rB.toFixed(2)+' m';$('moveQLabel').textContent=(qmicro>=0?'+':'')+qmicro.toFixed(1)+' μC';
+    const cx=w*.44,cy=h*.52,scale=Math.min(w,h)*.42/0.8;
+    ctx.save();
+    const rmin=30, rmax=Math.min(w,h)*.44, NR=6, Vhi=1/rmin, Vlo=1/rmax, dVr=(Vhi-Vlo)/NR;
+    ctx.setLineDash([7,6]);ctx.strokeStyle='rgba(117,103,217,.45)';ctx.lineWidth=2;
+    for(let i=0;i<=NR;i++){const r=1/(Vhi-i*dVr);ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();}
+    ctx.setLineDash([]);
+    const rin=36, rout=Math.min(w,h)*.40;
+    for(let a=0;a<Math.PI*2;a+=Math.PI/6){
+      const ca=Math.cos(a),sa=Math.sin(a);
+      if(Qmicro>0) arrow(ctx,cx+ca*rin,cy+sa*rin,cx+ca*rout,cy+sa*rout,'#16a6a6',2);
+      else arrow(ctx,cx+ca*rout,cy+sa*rout,cx+ca*rin,cy+sa*rin,'#16a6a6',2);
+    }
+    drawCharge(ctx,cx,cy,Qmicro,'source Q');
+    const ax=cx+rA*scale, ay=cy-scale*.13; const bx=cx+rB*scale, by=cy+scale*.16;
+    // dashed radius guides from the source
+    ctx.setLineDash([4,4]);ctx.strokeStyle='#12355b';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(ax,ay);ctx.moveTo(cx,cy);ctx.lineTo(bx,by);ctx.stroke();ctx.setLineDash([]);
+    // path the charge will take, A → B
+    ctx.setLineDash([5,5]);ctx.strokeStyle='#8a9bb0';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);ctx.stroke();ctx.setLineDash([]);
+    const pdx=bx-ax,pdy=by-ay,plen=Math.hypot(pdx,pdy)||1;
+    if(plen>34){const mx2=(ax+bx)/2,my2=(ay+by)/2;arrow(ctx,mx2-pdx/plen*9,my2-pdy/plen*9,mx2+pdx/plen*9,my2+pdy/plen*9,'#8a9bb0',2);}
+    // the moving charge q, starting at A
+    const neutral=qmicro===0;
+    ctx.beginPath();ctx.arc(ax,ay,12,0,Math.PI*2);
+    ctx.fillStyle=neutral?'#9aa8b6':(qmicro>0?'#e85d5a':'#2076d2');ctx.fill();
+    ctx.strokeStyle='white';ctx.lineWidth=2.5;ctx.stroke();
+    ctx.fillStyle='white';ctx.font='900 14px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(neutral?'0':(qmicro>0?'+':'−'),ax,ay+1);
+    // destination B: hollow ring
+    ctx.beginPath();ctx.arc(bx,by,12,0,Math.PI*2);ctx.strokeStyle='#35a853';ctx.lineWidth=3;ctx.stroke();
+    ctx.beginPath();ctx.arc(bx,by,3,0,Math.PI*2);ctx.fillStyle='#35a853';ctx.fill();
+    ctx.fillStyle='#12355b';ctx.font='900 14px Arial';ctx.fillText('A',ax,ay-22);ctx.fillText('B',bx,by+28);
+    ctx.font='800 11px Arial';ctx.fillStyle='#62748a';ctx.fillText('charge q starts here',ax,ay-35);ctx.fillText('destination',bx,by+41);
+    ctx.fillStyle='#12355b';ctx.font='900 18px Arial';ctx.textAlign='left';ctx.fillText('Potential around a point charge',18,26);
+    ctx.restore();
+    const VA=k*Q/rA, VB=k*Q/rB, dV=VB-VA, dU=q*dV, Wfield=-dU;
+    const high = VA>VB?'Point A':(VB>VA?'Point B':'neither — A and B are at equal potential');
+    const move = q===0 ? 'With q = 0 there is no electric force and no energy change.' : (Wfield>0 ? 'W > 0: the field pushes this charge from A to B on its own — it gains kinetic energy.' : (Wfield<0 ? 'W < 0: an external force must push this charge from A to B against the field.' : 'ΔV = 0: no net work is needed between A and B.'));
+    $('potentialResult').innerHTML = `V<sub>A</sub> = kQ/r<sub>A</sub> = <strong>${fmt(VA)} V</strong><br>`+
+      `V<sub>B</sub> = kQ/r<sub>B</sub> = <strong>${fmt(VB)} V</strong><br>`+
+      `ΔV = V<sub>B</sub> − V<sub>A</sub> = <strong>${fmt(dV)} V</strong><br>`+
+      `For q = ${(qmicro>=0?'+':'')}${qmicro.toFixed(1)} μC: ΔU = qΔV = <strong>${fmt(dU)} J</strong><br>`+
+      `Work done by the electric field = −ΔU = <strong>${fmt(Wfield)} J</strong>.<br>`+
+      `Higher electric potential: <strong>${high}</strong>.<br>${move}`;
+  }
+  ['sourceQ','rA','rB','moveQ'].forEach(id=>$(id).addEventListener('input',drawPotential));
+
+  function drawEquipotential(){
+    const canvas=$('equipCanvas'); if(!canvas)return;
+    const _s=setupCanvas(canvas); if(!_s) return; const {ctx,w,h}=_s;drawBackgroundGrid(ctx,w,h);
+    const mode=$('equipMode').value;
+    ctx.save();ctx.fillStyle='#12355b';ctx.font='900 18px Arial';ctx.fillText('Equipotential map + field direction',18,26);ctx.restore();
+    if(mode==='point'){
+      const cx=w*.5,cy=h*.54; const rmin=34, rmax=Math.min(w,h)*.42;
+      const N=6;
+      const Vhi=1/rmin, Vlo=1/rmax, dV=(Vhi-Vlo)/N;
+      ctx.save();ctx.setLineDash([8,6]);ctx.strokeStyle='rgba(117,103,217,.56)';ctx.lineWidth=2;
+      for(let i=0;i<=N;i++){const r=1/(Vhi-i*dV);ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();}
+      ctx.setLineDash([]);
+      for(let a=0;a<Math.PI*2;a+=Math.PI/8){arrow(ctx,cx+Math.cos(a)*34,cy+Math.sin(a)*34,cx+Math.cos(a)*Math.min(w,h)*.36,cy+Math.sin(a)*Math.min(w,h)*.36,'#16a6a6',2.2)}
+      drawCharge(ctx,cx,cy,1,'high V');ctx.restore();
+      $('equipResult').innerHTML='<strong>Point charge map:</strong> Each circle marks an equal step in potential (equal ΔV). The circles crowd together near the charge — exactly where the field is strongest — and spread out with distance. Field lines cross every circle at 90°.';
+    } else if(mode==='plates'){
+      const left=w*.22,right=w*.78,top=h*.16,bottom=h*.84;
+      ctx.save();roundRect(ctx,left-18,top,36,bottom-top,16);ctx.fillStyle='#ff9f1c';ctx.fill();roundRect(ctx,right-18,top,36,bottom-top,16);ctx.fillStyle='#2076d2';ctx.fill();
+      ctx.fillStyle='white';ctx.font='900 24px Arial';ctx.textAlign='center';ctx.fillText('+',left,top+30);ctx.fillText('−',right,top+30);
+      for(let y=top+35;y<bottom;y+=46)arrow(ctx,left+35,y,right-35,y,'#16a6a6',2.6);
+      ctx.setLineDash([7,6]);ctx.strokeStyle='rgba(117,103,217,.62)';ctx.lineWidth=2;
+      for(let i=1;i<=5;i++){const x=left+(right-left)*i/6;ctx.beginPath();ctx.moveTo(x,top+10);ctx.lineTo(x,bottom-10);ctx.stroke();}
+      ctx.setLineDash([]);ctx.fillStyle='#12355b';ctx.font='900 13px Arial';ctx.fillText('High V',left,bottom+24);ctx.fillText('Low V',right,bottom+24);ctx.restore();
+      $('equipResult').innerHTML='<strong>Parallel plate map:</strong> Equipotentials are parallel to the plates. The electric field is perpendicular to the equipotentials.';
+    } else {
+      const c1={x:w*.34,y:h*.54,q:4},c2={x:w*.66,y:h*.54,q:-4};
+      const charges=[{x:c1.x,y:c1.y,q:4},{x:c2.x,y:c2.y,q:-4}];
+      // Real dipole potential (arbitrary units); clamped near the charges.
+      const pot=(x,y)=>{
+        const r1=Math.max(Math.hypot(x-c1.x,y-c1.y),6), r2=Math.max(Math.hypot(x-c2.x,y-c2.y),6);
+        return 1/r1 - 1/r2;
+      };
+      // Equipotential contours via marching squares — these are genuinely perpendicular to the field.
+      const nLevels=3;
+      const levels=[0];
+      for(let i=1;i<=nLevels;i++){const v=0.0048*i; levels.push(v,-v);}
+      ctx.save();ctx.setLineDash([7,6]);ctx.strokeStyle='rgba(117,103,217,.6)';ctx.lineWidth=2;ctx.beginPath();
+      const cell=7, gx0=14, gy0=36, gx1=w-14, gy1=h-12;
+      const lerp=(a,b)=>a/(a-b);
+      for(const L of levels){
+        for(let gx=gx0;gx<gx1-cell;gx+=cell){
+          for(let gy=gy0;gy<gy1-cell;gy+=cell){
+            const v00=pot(gx,gy)-L, v10=pot(gx+cell,gy)-L, v01=pot(gx,gy+cell)-L, v11=pot(gx+cell,gy+cell)-L;
+            const p=[];
+            if(v00*v10<0)p.push([gx+cell*lerp(v00,v10),gy]);
+            if(v10*v11<0)p.push([gx+cell,gy+cell*lerp(v10,v11)]);
+            if(v01*v11<0)p.push([gx+cell*lerp(v01,v11),gy+cell]);
+            if(v00*v01<0)p.push([gx,gy+cell*lerp(v00,v01)]);
+            if(p.length>=2){ctx.moveTo(p[0][0],p[0][1]);ctx.lineTo(p[1][0],p[1][1]);if(p.length===4){ctx.moveTo(p[2][0],p[2][1]);ctx.lineTo(p[3][0],p[3][1]);}}
+          }
+        }
+      }
+      ctx.stroke();ctx.setLineDash([]);ctx.restore();
+      // Field lines: reuse the two-pass tracer from the Field Lines Lab so
+      // lines enter the negative charge from all sides, including the right.
+      traceFieldLineView(ctx,w,h,charges,2);
+      drawCharge(ctx,c1.x,c1.y,1,'high V');drawCharge(ctx,c2.x,c2.y,-1,'low V');
+      $('equipResult').innerHTML='<strong>Opposite-charge map:</strong> Field lines move from + to −. Equipotential curves wrap around each charge and always cross field lines at 90°. The straight vertical line in the middle is the V = 0 equipotential.';
+    }
+  }
+  $('equipMode').addEventListener('input',drawEquipotential);
+  document.querySelectorAll('.equipCheck').forEach((btn,i)=>btn.addEventListener('click',()=>{
+    const target=i===0?'equipCheck1':'equipCheck2';
+    $(target).innerHTML=i===0?'<strong>Answer:</strong> Zero work, because ΔV = 0 along an equipotential line.':'<strong>Answer:</strong> They meet at 90°, so field lines are perpendicular to equipotential lines.';
+  }));
+
+  const challengeData={
+    1:{ans:6000,unit:'N/C'},
+    2:{ans:4000,unit:'V/m'},
+    3:{ans:9,unit:'V'},
+    4:{ans:59933,unit:'V'},
+    5:{ans:-6.0e-4,unit:'J'}
+  };
+  const challengeState={};
+  function updateChallengeScore(){
+    const total=Object.keys(challengeData).length;
+    const solved=Object.values(challengeState).filter(s=>s==='solved').length;
+    $('challengeScore').innerHTML=`Challenge score: <strong>${solved}/${total}</strong>${solved===total?' — all solved. Excellent work!':''}`;
+    $('challengeBar').style.width=(solved/total*100)+'%';
+  }
+  function checkChallenge(i){
+    const d=challengeData[i]; const raw=$('ans'+i).value.trim(); const val=Number(raw); const fb=$('chk'+i);
+    if(raw===''||!Number.isFinite(val)){fb.innerHTML='<strong>Enter a numeric answer</strong> in '+d.unit+' — scientific notation like 6e3 works too.';return;}
+    const ok=Math.abs(val-d.ans)<=Math.abs(d.ans)*0.02;
+    if(ok){
+      if(challengeState[i]==='solved'){fb.innerHTML='<strong>Correct.</strong> Already scored.';}
+      else if(challengeState[i]==='revealed'){fb.innerHTML='<strong>Correct!</strong> No point this time — the solution was revealed first — but solid practice.';}
+      else {challengeState[i]='solved';fb.innerHTML='<strong>Correct! +1 point.</strong>';const card=$('ans'+i).closest('.challenge');if(card)card.style.borderColor='#35a853';updateChallengeScore();}
+    } else {
+      const hint=(d.ans<0&&val>0)?' Check the sign — the potential dropped, so what should happen to U?':' Check your unit conversions (cm → m, μC → C, mC → C) and try again.';
+      fb.innerHTML='<strong>Not quite.</strong>'+hint;
+    }
+  }
+  document.querySelectorAll('.checkAns').forEach(btn=>btn.addEventListener('click',()=>checkChallenge(btn.dataset.idx)));
+  for(const i of Object.keys(challengeData)){
+    $('ans'+i).addEventListener('keydown',e=>{if(e.key==='Enter')checkChallenge(i);});
+  }
+  document.querySelectorAll('.showSolution').forEach(btn=>btn.addEventListener('click',()=>{
+    const el=$(btn.dataset.target); el.style.display=el.style.display==='none'?'block':'none'; btn.textContent=el.style.display==='none'?'Reveal':'Hide';
+    if(el.style.display==='block'){
+      const m=btn.dataset.target.match(/^sol(\d)$/);
+      if(m && !challengeState[m[1]]){challengeState[m[1]]='revealed';}
+    }
+  }));
+  $('sampleExtension').addEventListener('click',()=>{$('extensionSample').style.display='block';});
+  $('clearExtension').addEventListener('click',()=>{$('extensionText').value='';$('extensionSample').style.display='none';});
+
+  const quiz = [
+    {q:'Electric field direction is defined as the direction of force on which charge?', choices:['A negative test charge','A positive test charge','A neutral atom','The source charge only'], a:1, f:'Electric field direction is based on a positive test charge.'},
+    {q:'Which statement about electric field lines is correct?', choices:['They cross when fields are strong','They point from − to +','Closer lines mean stronger field','They show the path of electrons only'], a:2, f:'Closer field lines represent a stronger electric field.'},
+    {q:'A force of 0.012 N acts on a 2.0 μC charge. What is E?', choices:['6.0 × 10³ N/C','2.4 × 10⁻⁸ N/C','1.7 × 10⁻⁴ N/C','6.0 N/C'], a:0, f:'E = F/q = 0.012/(2.0×10⁻⁶) = 6.0×10³ N/C.'},
+    {q:'What does 1 V mean?', choices:['1 N/C','1 J/C','1 C/J','1 N·m/C²'], a:1, f:'Voltage is energy per unit charge, so 1 V = 1 J/C.'},
+    {q:'Between parallel plates, the electric field points:', choices:['from low potential to high potential','from the negative plate to the positive plate','from the positive plate to the negative plate','parallel to the plates only'], a:2, f:'The electric field points from positive/high potential to negative/low potential.'},
+    {q:'Electric field lines meet equipotential lines at:', choices:['0°','45°','90°','any angle'], a:2, f:'Electric field lines are perpendicular to equipotential lines.'},
+    {q:'If ΔV is constant but d becomes smaller, the uniform electric field:', choices:['decreases','stays the same','becomes zero','increases'], a:3, f:'E = ΔV/d, so a smaller d gives a larger E.'},
+    {q:'Moving along one equipotential line means:', choices:['ΔV = 0','E = 0 everywhere','q = 0 always','field lines cross'], a:0, f:'All points on an equipotential line have the same potential, so ΔV = 0.'},
+    {q:'What is the electric potential 0.50 m from a +5.0 μC point charge?', choices:['9.0 × 10⁴ V','4.5 × 10⁴ V','1.8 × 10⁵ V','9.0 × 10⁹ V'], a:0, f:'V = kQ/r = (8.99 × 10⁹)(5.0 × 10⁻⁶) ÷ 0.50 ≈ 9.0 × 10⁴ V.'},
+    {q:'A +2.0 μC charge moves to a point 300 V lower in potential. Its potential energy:', choices:['increases by 6.0 × 10⁻⁴ J','decreases by 6.0 × 10⁻⁴ J','does not change','decreases by 600 J'], a:1, f:'ΔU = qΔV = (2.0 × 10⁻⁶)(−300) = −6.0 × 10⁻⁴ J, so U decreases by 6.0 × 10⁻⁴ J.'}
+  ];
+  function buildQuiz(){
+    const box=$('quizBox'); box.innerHTML='';
+    quiz.forEach((item,idx)=>{
+      const div=document.createElement('div');div.className='challenge';
+      div.innerHTML=`<h3>Question ${idx+1}</h3><p>${item.q}</p>`;
+      item.choices.forEach((ch,cidx)=>{const b=document.createElement('button');b.className='choice';b.type='button';b.textContent=ch;b.dataset.q=idx;b.dataset.c=cidx;b.addEventListener('click',()=>{div.querySelectorAll('.choice').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');});div.appendChild(b);});
+      const fb=document.createElement('div');fb.className='small';fb.id='feedback'+idx;fb.style.marginTop='8px';div.appendChild(fb);box.appendChild(div);
+    });
+    $('quizScore').style.display='none';$('quizBar').style.width='0%';
+  }
+  $('submitQuiz').addEventListener('click',()=>{
+    let score=0,answered=0;
+    quiz.forEach((item,idx)=>{
+      const selected=document.querySelector(`.choice[data-q="${idx}"].selected`);
+      const feedback=$('feedback'+idx);
+      document.querySelectorAll(`.choice[data-q="${idx}"]`).forEach(btn=>{btn.classList.remove('correct','incorrect'); if(Number(btn.dataset.c)===item.a) btn.classList.add('correct');});
+      if(selected){answered++; if(Number(selected.dataset.c)===item.a){score++;feedback.innerHTML='<strong>Correct.</strong> '+item.f;}else{selected.classList.add('incorrect');feedback.innerHTML='<strong>Review:</strong> '+item.f;}}
+      else feedback.innerHTML='<strong>Not answered.</strong> '+item.f;
+    });
+    const pct=Math.round(score/quiz.length*100);
+    $('quizScore').style.display='block';$('quizScore').innerHTML=`Score: ${score}/${quiz.length} (${pct}%). ${pct>=80?'Great work — you are ready for the worksheet!':pct>=60?'Good start — review the feedback and try again.':'Review the Learn and simulator tabs, then retake the quiz.'}`;
+    $('quizBar').style.width=pct+'%';
+  });
+  $('resetQuiz').addEventListener('click',buildQuiz);
+
+  function drawAll(){drawFieldLines();drawUniform();drawPotential();drawEquipotential();}
+  window.addEventListener('resize',()=>setTimeout(drawAll,100));
+  buildQuiz();drawAll();
+})();
+</script>
+</body>
+</html>
